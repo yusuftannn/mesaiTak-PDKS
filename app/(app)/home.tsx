@@ -1,8 +1,12 @@
 import { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+
 import { useAuthStore } from "../../src/store/auth.store";
 import { useHomeStore } from "../../src/store/home.store";
 import AppButton from "../../src/components/AppButton";
+import { formatMinutes } from "../../src/utils/time";
+import { toDateSafe } from "../../src/utils/date";
 
 export default function Home() {
   const user = useAuthStore((s) => s.user);
@@ -11,9 +15,18 @@ export default function Home() {
     loadToday,
     startWork,
     endWork,
+    startBreak,
+    endBreak,
+
     status,
     checkInTime,
     loading,
+    breaks,
+
+    selectedBreakType,
+    setBreakType,
+    totalBreakMinutes,
+    totalWorkMinutes,
   } = useHomeStore();
 
   useEffect(() => {
@@ -29,75 +42,93 @@ export default function Home() {
     );
   }
 
-  const statusLabel =
-    status === "idle"
-      ? "Mesai Dışı"
-      : status === "working"
-      ? "Çalışıyor"
-      : "Mesai Tamamlandı";
-
-  const statusColor =
-    status === "idle"
-      ? "#6B7280"
-      : status === "working"
-      ? "#2563EB"
-      : "#16A34A";
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.greeting}>
-          Merhaba, {user?.name ?? "Kullanıcı"}
-        </Text>
-        <Text style={styles.subGreeting}>Bugünkü çalışma durumun</Text>
+      <Text style={styles.title}>Merhaba, {user?.name ?? "Kullanıcı"}</Text>
+
+      <View style={styles.card}>
+        <Text style={styles.label}>Durum</Text>
+        <Text style={styles.value}>{status}</Text>
+
+        {checkInTime && (
+          <Text style={styles.subText}>Giriş: {checkInTime}</Text>
+        )}
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Durum</Text>
-
-        <View style={styles.statusRow}>
-          <View
-            style={[
-              styles.statusDot,
-              { backgroundColor: statusColor },
-            ]}
-          />
-          <Text style={[styles.statusText, { color: statusColor }]}>
-            {statusLabel}
-          </Text>
-        </View>
-
-        {checkInTime && (
-          <Text style={styles.infoText}>
-            Giriş Saati:{" "}
-            <Text style={styles.infoStrong}>{checkInTime}</Text>
-          </Text>
-        )}
+        <Text style={styles.label}>Özet</Text>
+        <Text>Toplam Mola: {formatMinutes(totalBreakMinutes)}</Text>
+        <Text>Net Çalışma: {formatMinutes(totalWorkMinutes)}</Text>
       </View>
 
-      <View style={styles.actions}>
-        {status === "idle" && (
+      {status === "idle" && (
+        <AppButton title="Mesaiye Başla" onPress={() => startWork(user!.uid)} />
+      )}
+
+      {status === "working" && (
+        <View style={styles.card}>
+          <Text style={styles.label}>Mola Türü</Text>
+
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={selectedBreakType}
+              onValueChange={setBreakType}
+              dropdownIconColor="#111827"
+              style={styles.picker}
+            >
+              <Picker.Item label="🍽️ Yemek Molası" value="yemek" />
+              <Picker.Item label="☕ Çay / Kahve" value="cay_kahve" />
+              <Picker.Item label="🚬 Sigara" value="sigara" />
+              <Picker.Item label="➕ Diğer" value="diger" />
+            </Picker>
+          </View>
+
           <AppButton
-            title="Mesaiye Başla"
-            onPress={() => startWork(user!.uid)}
+            title="Molaya Çık"
+            onPress={startBreak}
+            variant="secondary"
           />
+
+          <View style={{ marginTop: 8 }}>
+            <AppButton
+              title="Mesaiyi Bitir"
+              onPress={endWork}
+              variant="danger"
+            />
+          </View>
+        </View>
+      )}
+
+      {status === "break" && (
+        <AppButton title="Molayı Bitir" onPress={endBreak} variant="primary" />
+      )}
+
+      <View style={styles.card}>
+        <Text style={styles.label}>Son Mola İşlemleriniz</Text>
+
+        {breaks.length === 0 && (
+          <Text style={styles.subText}>Henüz mola yok</Text>
         )}
 
-        {status === "working" && (
-          <AppButton
-            title="Mesaiyi Bitir"
-            onPress={endWork}
-            variant="danger"
-          />
-        )}
+        {breaks
+          .slice(-3)
+          .reverse()
+          .map((b, i) => (
+            <Text key={i} style={styles.breakItem}>
+              • {b.type} —{" "}
+              {toDateSafe(b.start)
+                ? toDateSafe(b.start)!.toLocaleTimeString("tr-TR")
+                : "--"}
+              {" → "}
+              {toDateSafe(b.end)
+                ? toDateSafe(b.end)!.toLocaleTimeString("tr-TR")
+                : "Devam ediyor"}
+            </Text>
+          ))}
       </View>
 
       {status === "completed" && (
-        <View style={[styles.card, styles.successCard]}>
-          <Text style={styles.successText}>
-            ✅ Bugünkü mesain tamamlandı
-          </Text>
-        </View>
+        <Text style={styles.done}>Bugünkü mesain tamamlandı ✅</Text>
       )}
     </View>
   );
@@ -109,84 +140,77 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
     padding: 20,
   },
+
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
+
   loading: {
-    fontSize: 16,
     color: "#6B7280",
   },
 
-  header: {
-    marginBottom: 20,
-  },
-  greeting: {
+  title: {
     fontSize: 22,
     fontWeight: "700",
     color: "#111827",
-  },
-  subGreeting: {
-    marginTop: 4,
-    fontSize: 15,
-    color: "#6B7280",
+    marginBottom: 12,
   },
 
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 14,
     padding: 16,
+    borderRadius: 14,
     marginBottom: 16,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
   },
-  cardTitle: {
+
+  label: {
     fontSize: 14,
     fontWeight: "600",
     color: "#6B7280",
-    marginBottom: 8,
+    marginBottom: 6,
   },
 
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  statusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 8,
-  },
-  statusText: {
+  value: {
     fontSize: 16,
     fontWeight: "600",
+    color: "#111827",
   },
 
-  infoText: {
-    fontSize: 14,
+  subText: {
+    fontSize: 13,
     color: "#6B7280",
     marginTop: 4,
   },
-  infoStrong: {
-    color: "#111827",
-    fontWeight: "600",
-  },
 
-  actions: {
-    marginTop: 8,
-  },
-
-  successCard: {
-    backgroundColor: "#ECFDF5",
-    borderColor: "#A7F3D0",
+  pickerWrapper: {
     borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    marginBottom: Platform.OS === "ios" ? 12 : 16,
+    overflow: "hidden",
+    backgroundColor: "#F9FAFB",
   },
-  successText: {
-    color: "#065F46",
+
+  picker: {
+    height: Platform.OS === "ios" ? 140 : 50,
+    color: "#111827",
+  },
+
+  breakItem: {
+    fontSize: 14,
+    color: "#374151",
+    marginTop: 4,
+  },
+
+  done: {
+    marginTop: 16,
+    color: "#16A34A",
     fontWeight: "600",
     textAlign: "center",
   },

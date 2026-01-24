@@ -1,5 +1,4 @@
 import {
-  addDoc,
   collection,
   getDocs,
   query,
@@ -7,27 +6,26 @@ import {
   updateDoc,
   serverTimestamp,
   doc,
+  Timestamp,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
 const attendanceRef = collection(db, "attendance");
 
-// Bugünkü kaydı getir (uid bazlı)
 export async function getTodayAttendance(uid: string, date: string) {
   const q = query(
     attendanceRef,
-    where("uid", "==", uid),      // 🔴 DÜZELTİLDİ
+    where("uid", "==", uid),
     where("date", "==", date)
   );
-
   const snap = await getDocs(q);
   return snap.docs[0] ?? null;
 }
 
-// Mesaiye başla
 export async function startWork(uid: string, date: string) {
   return addDoc(attendanceRef, {
-    uid,                          // 🔴 DÜZELTİLDİ
+    uid,
     date,
     checkInAt: serverTimestamp(),
     checkOutAt: null,
@@ -37,35 +35,45 @@ export async function startWork(uid: string, date: string) {
   });
 }
 
-// Mesaiyi bitir
 export async function endWork(attendanceId: string) {
-  const ref = doc(db, "attendance", attendanceId);
-
-  return updateDoc(ref, {
+  return updateDoc(doc(db, "attendance", attendanceId), {
     checkOutAt: serverTimestamp(),
     status: "completed",
   });
 }
 
-// Molaya çık
-export async function startBreak(attendanceId: string, breaks: any[]) {
-  const ref = doc(db, "attendance", attendanceId);
-
-  return updateDoc(ref, {
-    breaks: [...breaks, { start: serverTimestamp(), end: null }],
+// Mola başlat
+export async function startBreak(
+  attendanceId: string,
+  breaks: any[],
+  type: string
+) {
+  return updateDoc(doc(db, "attendance", attendanceId), {
+    breaks: [
+      ...breaks,
+      {
+        type,
+        start: Timestamp.fromDate(new Date()),
+        end: null,
+      },
+    ],
     status: "break",
   });
 }
 
-// Molayı bitir
-export async function endBreak(attendanceId: string, breaks: any[]) {
-  const ref = doc(db, "attendance", attendanceId);
+// Mola bitir
+export async function endBreak(
+  attendanceId: string,
+  breaks: any[]
+) {
+  const updated = [...breaks];
+  updated[updated.length - 1] = {
+    ...updated[updated.length - 1],
+    end: Timestamp.fromDate(new Date()),
+  };
 
-  const updatedBreaks = [...breaks];
-  updatedBreaks[updatedBreaks.length - 1].end = serverTimestamp();
-
-  return updateDoc(ref, {
-    breaks: updatedBreaks,
+  return updateDoc(doc(db, "attendance", attendanceId), {
+    breaks: updated,
     status: "working",
   });
 }

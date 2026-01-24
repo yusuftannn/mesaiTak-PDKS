@@ -4,7 +4,16 @@ import {
   getTodayAttendance,
   startWork as fsStartWork,
   endWork as fsEndWork,
+  startBreak as fsStartBreak,
+  endBreak as fsEndBreak,
 } from "../services/attendance.service";
+import { diffMinutes } from "../utils/time";
+
+type BreakItem = {
+  type: string;
+  start: any;
+  end: any | null;
+};
 
 type WorkStatus = "idle" | "working" | "break" | "completed";
 
@@ -15,11 +24,20 @@ type HomeState = {
   attendanceDocId: string | null;
   status: WorkStatus;
   checkInTime: string | null;
+  breaks: BreakItem[];
+
+  totalBreakMinutes: number;
+  totalWorkMinutes: number;
+
+  selectedBreakType: string;
 
   loadToday: (uid: string) => Promise<void>;
   startWork: (uid: string) => Promise<void>;
   endWork: () => Promise<void>;
-  reset: () => void;
+
+  startBreak: () => Promise<void>;
+  endBreak: () => Promise<void>;
+  setBreakType: (t: string) => void;
 };
 
 export const useHomeStore = create<HomeState>((set, get) => ({
@@ -29,91 +47,128 @@ export const useHomeStore = create<HomeState>((set, get) => ({
   attendanceDocId: null,
   status: "idle",
   checkInTime: null,
+  breaks: [],
+
+  totalBreakMinutes: 0,
+  totalWorkMinutes: 0,
+
+  selectedBreakType: "yemek",
 
   loadToday: async (uid) => {
     const today = dayjs().format("YYYY-MM-DD");
     const cacheKey = `${uid}_${today}`;
-
     if (get().lastLoadedKey === cacheKey) return;
 
-    try {
-      set({ loading: true });
+    set({ loading: true });
 
-      const docSnap = await getTodayAttendance(uid, today);
+    const snap = await getTodayAttendance(uid, today);
 
-      if (!docSnap) {
-        set({
-          attendanceDocId: null,
-          status: "idle",
-          checkInTime: null,
-          lastLoadedKey: cacheKey,
-        });
-        return;
-      }
-
-      const data = docSnap.data();
-
+    if (!snap) {
       set({
-        attendanceDocId: docSnap.id,
-        status: data.status ?? "idle",
-        checkInTime: data.checkInAt
-          ? data.checkInAt.toDate().toLocaleTimeString("tr-TR")
-          : null,
+        attendanceDocId: null,
+        status: "idle",
+        breaks: [],
+        totalBreakMinutes: 0,
+        totalWorkMinutes: 0,
         lastLoadedKey: cacheKey,
+        loading: false,
       });
-    } catch (err) {
-      console.error("loadToday error:", err);
-      set({ status: "idle", attendanceDocId: null });
-    } finally {
-      set({ loading: false });
+      return;
     }
+
+    const data = snap.data();
+    const now = new Date();
+
+    const breakMinutes = (data.breaks ?? []).reduce(
+      (sum: number, b: BreakItem) => {
+        if (!b.start) return sum;
+        const s = b.start.toDate();
+        const e = b.end ? b.end.toDate() : now;
+        return sum + diffMinutes(s, e);
+      },
+      0
+    );
+
+    const workMinutes =
+      data.checkInAt
+        ? diffMinutes(
+            data.checkInAt.toDate(),
+            data.checkOutAt ? data.checkOutAt.toDate() : now
+          ) - breakMinutes
+        : 0;
+
+    set({
+      attendanceDocId: snap.id,
+      status: data.status,
+      breaks: data.breaks ?? [],
+      checkInTime: data.checkInAt
+        ? data.checkInAt.toDate().toLocaleTimeString("tr-TR")
+        : null,
+      totalBreakMinutes: breakMinutes,
+      totalWorkMinutes: Math.max(0, workMinutes),
+      lastLoadedKey: cacheKey,
+      loading: false,
+    });
   },
 
   startWork: async (uid) => {
-    try {
-      set({ loading: true });
+    set({ loading: true });
+    const today = dayjs().format("YYYY-MM-DD");
+    const ref = await fsStartWork(uid, today);
 
-      const today = dayjs().format("YYYY-MM-DD");
-      const ref = await fsStartWork(uid, today);
-
-      set({
-        attendanceDocId: ref.id,
-        status: "working",
-        checkInTime: new Date().toLocaleTimeString("tr-TR"),
-        lastLoadedKey: `${uid}_${today}`,
-      });
-    } catch (err) {
-      console.error("startWork error:", err);
-    } finally {
-      set({ loading: false });
-    }
+    set({
+      attendanceDocId: ref.id,
+      status: "working",
+      breaks: [],
+      totalBreakMinutes: 0,
+      totalWorkMinutes: 0,
+      lastLoadedKey: `${uid}_${today}`,
+      loading: false,
+    });
   },
 
   endWork: async () => {
     const { attendanceDocId } = get();
     if (!attendanceDocId) return;
 
-    try {
-      set({ loading: true });
-
-      await fsEndWork(attendanceDocId);
-
-      set({
-        status: "completed",
-      });
-    } catch (err) {
-      console.error("endWork error:", err);
-    } finally {
-      set({ loading: false });
-    }
+    set({ loading: true });
+    await fsEndWork(attendanceDocId);
+    set({ status: "completed", loading: false });
   },
 
-  reset: () =>
+  startBreak: async () => {
+    const { attendanceDocId, breaks, selectedBreakType } = get();
+    if (!attendanceDocId) return;
+
+    set({ loading: true });
+    await fsStartBreak(attendanceDocId, breaks, selectedBreakType);
+
     set({
+      status: "break",
+      breaks: [
+        ...breaks,
+        { type: selectedBreakType, start: new Date(), end: null },
+      ],
       loading: false,
-      lastLoadedKey: null,
-      attendanceDocId: null,
-      status: "idle",
-      checkInTime: null,
-    }),
+    });
+  },
+
+  endBreak: async () => {
+    const { attendanceDocId, breaks } = get();
+    if (!attendanceDocId) return;
+
+    set({ loading: true });
+    await fsEndBreak(attendanceDocId, breaks);
+
+    const updated = [...breaks];
+    updated[updated.length - 1].end = new Date();
+
+    set({
+      status: "working",
+      breaks: updated,
+      loading: false,
+    });
+  },
+
+  setBreakType: (t) => set({ selectedBreakType: t }),
 }));
