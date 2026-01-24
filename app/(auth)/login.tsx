@@ -9,12 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { login } from "../../src/services/auth.service";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+
+import { login, getUserProfile } from "../../src/services/auth.service";
+import { useAuthStore } from "../../src/store/auth.store";
 
 function mapFirebaseAuthError(err: any): string {
-  const code: string | undefined = err?.code || err?.error?.code;
+  const code: string | undefined = err?.code;
 
   switch (code) {
     case "auth/invalid-email":
@@ -22,26 +24,16 @@ function mapFirebaseAuthError(err: any): string {
     case "auth/user-not-found":
       return "Bu e-posta ile kayıtlı kullanıcı bulunamadı.";
     case "auth/wrong-password":
-      return "Şifre yanlış. Lütfen tekrar deneyin.";
     case "auth/invalid-credential":
       return "E-posta veya şifre hatalı.";
     case "auth/too-many-requests":
-      return "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.";
+      return "Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.";
     case "auth/network-request-failed":
-      return "Ağ hatası. İnternet bağlantınızı kontrol edin.";
+      return "İnternet bağlantısı bulunamadı.";
     case "auth/user-disabled":
       return "Bu hesap devre dışı bırakılmış.";
     default:
-      const rawMsg =
-        err?.message ||
-        err?.error?.message ||
-        "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.";
-
-      if (typeof rawMsg === "string" && rawMsg.toLowerCase().includes("firebase")) {
-        return "Giriş başarısız. E-posta/şifre bilgilerinizi kontrol edin.";
-      }
-
-      return rawMsg;
+      return "Giriş başarısız. Bilgilerinizi kontrol edin.";
   }
 }
 
@@ -53,6 +45,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const setUser = useAuthStore((s) => s.setUser);
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -65,8 +58,11 @@ export default function Login() {
     setError("");
 
     try {
-      await login(email.trim(), password);
-      router.replace("/home");
+      const cred = await login(email.trim(), password);
+      const profile = await getUserProfile(cred.user.uid);
+
+      setUser(profile);
+      router.replace("/(app)/home");
     } catch (e: any) {
       setError(mapFirebaseAuthError(e));
     } finally {
@@ -102,7 +98,6 @@ export default function Login() {
             value={password}
             onChangeText={setPassword}
           />
-
           <TouchableOpacity
             onPress={() => setShowPassword((s) => !s)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -131,12 +126,12 @@ export default function Login() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => router.push("/register")}
-          style={styles.registerLinkContainer}
+          onPress={() => router.push("/(auth)/register")}
+          style={styles.linkContainer}
         >
-          <Text style={styles.registerLink}>
+          <Text style={styles.link}>
             Hesabın yok mu?{" "}
-            <Text style={styles.registerLinkBold}>Kayıt Ol</Text>
+            <Text style={styles.linkBold}>Kayıt Ol</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -212,17 +207,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  registerLinkContainer: {
+  linkContainer: {
     marginTop: 24,
     alignItems: "center",
   },
-  registerLink: {
+  link: {
     color: "#6B7280",
     fontSize: 15,
   },
-  registerLinkBold: {
+  linkBold: {
     color: "#2563EB",
     fontWeight: "600",
   },
 });
-

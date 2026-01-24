@@ -9,12 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { register } from "../../src/services/auth.service";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+
+import { register } from "../../src/services/auth.service";
 
 export default function Register() {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,17 +29,17 @@ export default function Register() {
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
-      setError("Tüm alanlar zorunludur");
+      setError("Tüm alanlar zorunludur.");
       return;
     }
 
     if (password.length < 6) {
-      setError("Şifre en az 6 karakter olmalıdır");
+      setError("Şifre en az 6 karakter olmalıdır.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Şifreler birbiriyle uyuşmuyor");
+      setError("Şifreler uyuşmuyor.");
       return;
     }
 
@@ -46,14 +48,14 @@ export default function Register() {
     setSuccess("");
 
     try {
-      await register(email.trim(), password);
+      await register(email.trim(), password, name);
       setSuccess("Kayıt başarılı! Giriş ekranına yönlendiriliyorsunuz…");
 
       setTimeout(() => {
-        router.replace("/login");
+        router.replace("/(auth)/login");
       }, 1200);
     } catch (e: any) {
-      setError(e.message || "Kayıt işlemi başarısız");
+      setError(e?.message || "Kayıt işlemi başarısız.");
     } finally {
       setLoading(false);
     }
@@ -66,9 +68,15 @@ export default function Register() {
     >
       <View style={styles.container}>
         <Text style={styles.title}>Hesap Oluştur ✨</Text>
-        <Text style={styles.subtitle}>
-          Bilgilerini girerek devam et
-        </Text>
+        <Text style={styles.subtitle}>Bilgilerini girerek devam et</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Ad Soyad"
+          placeholderTextColor="#9CA3AF"
+          value={name}
+          onChangeText={setName}
+        />
 
         <TextInput
           style={styles.input}
@@ -89,9 +97,7 @@ export default function Register() {
             value={password}
             onChangeText={setPassword}
           />
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-          >
+          <TouchableOpacity onPress={() => setShowPassword((s) => !s)}>
             <Ionicons
               name={showPassword ? "eye-off" : "eye"}
               size={22}
@@ -109,28 +115,15 @@ export default function Register() {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
           />
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            <Ionicons
-              name={showPassword ? "eye-off" : "eye"}
-              size={22}
-              color="#6B7280"
-            />
-          </TouchableOpacity>
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {success ? <Text style={styles.success}>{success}</Text> : null}
 
         <TouchableOpacity
-          style={[
-            styles.button,
-            loading && styles.buttonDisabled,
-          ]}
+          style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleRegister}
           disabled={loading}
-          activeOpacity={0.8}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
@@ -140,18 +133,19 @@ export default function Register() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => router.replace("/login")}
-          style={styles.loginLinkContainer}
+          onPress={() => router.replace("/(auth)/login")}
+          style={styles.linkContainer}
         >
-          <Text style={styles.loginLink}>
+          <Text style={styles.link}>
             Zaten hesabın var mı?{" "}
-            <Text style={styles.loginLinkBold}>Giriş Yap</Text>
+            <Text style={styles.linkBold}>Giriş Yap</Text>
           </Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
+
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
@@ -225,15 +219,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  loginLinkContainer: {
+  linkContainer: {
     marginTop: 24,
     alignItems: "center",
   },
-  loginLink: {
+  link: {
     color: "#6B7280",
     fontSize: 15,
   },
-  loginLinkBold: {
+  linkBold: {
     color: "#2563EB",
     fontWeight: "600",
   },
