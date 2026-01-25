@@ -1,37 +1,87 @@
-import { Pressable, Text } from "react-native";
+import { Pressable, Text, View, StyleSheet } from "react-native";
+import { ReactNode } from "react";
+
+type Variant = "primary" | "danger" | "secondary";
 
 type Props = {
   title: string;
   onPress: () => void;
-  variant?: "primary" | "danger" | "secondary";
+  variant?: Variant;
+  icon?: ReactNode;
+  disabled?: boolean;
 };
 
 export default function AppButton({
   title,
   onPress,
   variant = "primary",
+  icon,
+  disabled = false,
 }: Props) {
-  const bg =
+  const backgroundColor =
     variant === "primary"
-      ? "#2563eb"
+      ? "#2563EB"
       : variant === "danger"
-      ? "#dc2626"
-      : "#e5e7eb";
+      ? "#DC2626"
+      : "#E5E7EB";
 
-  const color = variant === "secondary" ? "#111827" : "#fff";
+  const textColor =
+    variant === "secondary" ? "#111827" : "#FFFFFF";
 
   return (
     <Pressable
       onPress={onPress}
-      style={{
-        backgroundColor: bg,
-        padding: 14,
-        borderRadius: 10,
-        alignItems: "center",
-        marginVertical: 6,
-      }}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.button,
+        {
+          backgroundColor,
+          opacity: disabled ? 0.45 : pressed ? 0.85 : 1,
+        },
+      ]}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
     >
-      <Text style={{ color, fontWeight: "600" }}>{title}</Text>
+      <View style={styles.content}>
+        {icon && <View style={styles.icon}>{icon}</View>}
+        <Text
+          style={[
+            styles.text,
+            { color: textColor },
+            disabled && styles.disabledText,
+          ]}
+        >
+          {title}
+        </Text>
+      </View>
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginVertical: 6,
+  },
+
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  icon: {
+    marginTop: 1,
+  },
+
+  text: {
+    fontWeight: "600",
+    fontSize: 15,
+  },
+
+  disabledText: {
+    opacity: 0.7,
+  },
+});
