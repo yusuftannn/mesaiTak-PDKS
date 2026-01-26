@@ -15,7 +15,7 @@ type BreakItem = {
   end: any | null;
 };
 
-type WorkStatus = "idle" | "working" | "break" | "completed";
+type WorkStatus = "boşta" | "çalışıyor" | "mola" | "tamamlandı";
 
 type HomeState = {
   loading: boolean;
@@ -23,7 +23,7 @@ type HomeState = {
 
   attendanceDocId: string | null;
   status: WorkStatus;
-  checkInTime: string | null;
+  checkInAt: Date | null;
   breaks: BreakItem[];
 
   totalBreakMinutes: number;
@@ -40,13 +40,39 @@ type HomeState = {
   setBreakType: (t: string) => void;
 };
 
+const recalculateTotals = (state: HomeState) => {
+  const now = new Date();
+
+  const breakMinutes = state.breaks.reduce((sum, b) => {
+    if (!b.start) return sum;
+    const s = b.start instanceof Date ? b.start : b.start.toDate();
+    const e = b.end ? (b.end instanceof Date ? b.end : b.end.toDate()) : now;
+
+    return sum + diffMinutes(s, e);
+  }, 0);
+
+  let workMinutes = 0;
+
+  if (state.checkInAt) {
+    const start = state.checkInAt;
+    const end = new Date();
+
+    workMinutes = diffMinutes(start, end) - breakMinutes;
+  }
+
+  return {
+    totalBreakMinutes: breakMinutes,
+    totalWorkMinutes: Math.max(0, workMinutes),
+  };
+};
+
 export const useHomeStore = create<HomeState>((set, get) => ({
   loading: false,
   lastLoadedKey: null,
 
   attendanceDocId: null,
-  status: "idle",
-  checkInTime: null,
+  status: "boşta",
+  checkInAt: null,
   breaks: [],
 
   totalBreakMinutes: 0,
@@ -66,7 +92,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
     if (!snap) {
       set({
         attendanceDocId: null,
-        status: "idle",
+        status: "boşta",
         breaks: [],
         totalBreakMinutes: 0,
         totalWorkMinutes: 0,
@@ -86,24 +112,21 @@ export const useHomeStore = create<HomeState>((set, get) => ({
         const e = b.end ? b.end.toDate() : now;
         return sum + diffMinutes(s, e);
       },
-      0
+      0,
     );
 
-    const workMinutes =
-      data.checkInAt
-        ? diffMinutes(
-            data.checkInAt.toDate(),
-            data.checkOutAt ? data.checkOutAt.toDate() : now
-          ) - breakMinutes
-        : 0;
+    const workMinutes = data.checkInAt
+      ? diffMinutes(
+          data.checkInAt.toDate(),
+          data.checkOutAt ? data.checkOutAt.toDate() : now,
+        ) - breakMinutes
+      : 0;
 
     set({
       attendanceDocId: snap.id,
       status: data.status,
       breaks: data.breaks ?? [],
-      checkInTime: data.checkInAt
-        ? data.checkInAt.toDate().toLocaleTimeString("tr-TR")
-        : null,
+      checkInAt: data.checkInAt ? data.checkInAt.toDate() : null,
       totalBreakMinutes: breakMinutes,
       totalWorkMinutes: Math.max(0, workMinutes),
       lastLoadedKey: cacheKey,
@@ -118,8 +141,9 @@ export const useHomeStore = create<HomeState>((set, get) => ({
 
     set({
       attendanceDocId: ref.id,
-      status: "working",
+      status: "çalışıyor",
       breaks: [],
+      checkInAt: new Date(),
       totalBreakMinutes: 0,
       totalWorkMinutes: 0,
       lastLoadedKey: `${uid}_${today}`,
@@ -133,7 +157,11 @@ export const useHomeStore = create<HomeState>((set, get) => ({
 
     set({ loading: true });
     await fsEndWork(attendanceDocId);
-    set({ status: "completed", loading: false });
+    set((state) => ({
+      status: "tamamlandı",
+      ...recalculateTotals(state),
+      loading: false,
+    }));
   },
 
   startBreak: async () => {
@@ -143,14 +171,15 @@ export const useHomeStore = create<HomeState>((set, get) => ({
     set({ loading: true });
     await fsStartBreak(attendanceDocId, breaks, selectedBreakType);
 
-    set({
-      status: "break",
+    set((state) => ({
+      status: "mola",
       breaks: [
-        ...breaks,
-        { type: selectedBreakType, start: new Date(), end: null },
+        ...state.breaks,
+        { type: state.selectedBreakType, start: new Date(), end: null },
       ],
+      ...recalculateTotals(state),
       loading: false,
-    });
+    }));
   },
 
   endBreak: async () => {
@@ -163,10 +192,16 @@ export const useHomeStore = create<HomeState>((set, get) => ({
     const updated = [...breaks];
     updated[updated.length - 1].end = new Date();
 
-    set({
-      status: "working",
-      breaks: updated,
-      loading: false,
+    set((state) => {
+      const updated = [...state.breaks];
+      updated[updated.length - 1].end = new Date();
+
+      return {
+        status: "çalışıyor",
+        breaks: updated,
+        ...recalculateTotals({ ...state, breaks: updated }),
+        loading: false,
+      };
     });
   },
 

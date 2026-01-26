@@ -1,16 +1,12 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { updateDoc, doc, serverTimestamp } from "firebase/firestore";
 
 import { useAuthStore } from "../../src/store/auth.store";
 import { db } from "../../src/services/firebase";
 import AppButton from "../../src/components/AppButton";
+import PageHeader from "../../src/components/PageHeader";
 
 export default function EditProfile() {
   const user = useAuthStore((s) => s.user);
@@ -45,34 +41,28 @@ export default function EditProfile() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Profili Düzenle</Text>
+    <View style={{ flex: 1 }}>
+      <PageHeader title="Profili Düzenle" showBack={true} />
+      <View style={styles.container}>
 
-      <View style={styles.card}>
-        <Text style={styles.label}>Ad Soyad</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="Ad Soyad"
-        />
+        <View style={styles.card}>
+          <Text style={styles.label}>Ad Soyad</Text>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="Ad Soyad"
+          />
 
-        <Text style={styles.label}>E-posta</Text>
-        <Text style={styles.readonly}>
-          {user?.email}
-        </Text>
+          <Text style={styles.label}>E-posta</Text>
+          <Text style={styles.readonly}>{user?.email}</Text>
 
-        <Text style={styles.label}>Rol</Text>
-        <Text style={styles.readonly}>
-          {user?.role}
-        </Text>
+          <Text style={styles.label}>Rol</Text>
+          <Text style={styles.readonly}>{user?.role}</Text>
+        </View>
+
+        <AppButton title="Kaydet" onPress={handleSave} disabled={loading} />
       </View>
-
-      <AppButton
-        title="Kaydet"
-        onPress={handleSave}
-        disabled={loading}
-      />
     </View>
   );
 }
@@ -82,12 +72,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F9FAFB",
     padding: 20,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 16,
   },
 
   card: {

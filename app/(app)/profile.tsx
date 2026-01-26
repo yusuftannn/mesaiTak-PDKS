@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { useAuthStore } from "../../src/store/auth.store";
 import AppButton from "../../src/components/AppButton";
 import { auth } from "../../src/services/firebase";
+import PageHeader from "../../src/components/PageHeader";
 
 export default function Profile() {
   const user = useAuthStore((s) => s.user);
@@ -18,37 +19,40 @@ export default function Profile() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Ionicons name="person-circle" size={88} color="#2563EB" />
-        <Text style={styles.name}>{user?.name ?? "Kullanıcı"}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
-      </View>
+    <View style={{ flex: 1 }}>
+      <PageHeader title="Profil" showBack={true} />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Ionicons name="person-circle" size={88} color="#2563EB" />
+          <Text style={styles.name}>{user?.name ?? "Kullanıcı"}</Text>
+          <Text style={styles.email}>{user?.email}</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.label}>Rol</Text>
-        <Text style={styles.value}>{user?.role ?? "-"}</Text>
+        <View style={styles.card}>
+          <Text style={styles.label}>Rol</Text>
+          <Text style={styles.value}>{user?.role ?? "-"}</Text>
 
-        <Text style={styles.label}>Şirket</Text>
-        <Text style={styles.value}>{user?.companyId ?? "Tanımlı değil"}</Text>
+          <Text style={styles.label}>Şirket</Text>
+          <Text style={styles.value}>{user?.companyId ?? "Tanımlı değil"}</Text>
 
-        <Text style={styles.label}>Şube</Text>
-        <Text style={styles.value}>{user?.branchId ?? "Tanımlı değil"}</Text>
-      </View>
+          <Text style={styles.label}>Şube</Text>
+          <Text style={styles.value}>{user?.branchId ?? "Tanımlı değil"}</Text>
+        </View>
 
-      <View style={styles.actions}>
-        <AppButton
-          title="Profili Düzenle"
-          variant="secondary"
-          onPress={() => router.push("/(app)/edit-profile")}
-        />
-
-        <View style={{ marginTop: 12 }}>
+        <View style={styles.actions}>
           <AppButton
-            title="Çıkış Yap"
-            variant="danger"
-            onPress={handleLogout}
+            title="Profili Düzenle"
+            variant="secondary"
+            onPress={() => router.push("/(app)/edit-profile")}
           />
+
+          <View style={{ marginTop: 12 }}>
+            <AppButton
+              title="Çıkış Yap"
+              variant="danger"
+              onPress={handleLogout}
+            />
+          </View>
         </View>
       </View>
     </View>

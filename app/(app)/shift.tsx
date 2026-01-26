@@ -1,10 +1,14 @@
 import { View, Text, StyleSheet } from "react-native";
+import PageHeader from "../../src/components/PageHeader";
 
 export default function Shift() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Vardiya</Text>
-      <Text>Vardiya bilgileri burada gösterilecek.</Text>
+    <View style={{ flex: 1 }}>
+      <PageHeader title="Vardiya" showBack={true} />
+      <View style={styles.container}>
+        <Text style={styles.title}>Vardiya</Text>
+        <Text>Vardiya bilgileri burada gösterilecek.</Text>
+      </View>
     </View>
   );
 }
