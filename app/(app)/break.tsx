@@ -32,7 +32,7 @@ export default function Break() {
 
   return (
     <View style={styles.container}>
-      <PageHeader title="Mola" showBack />
+      <PageHeader title="Mola" showBack={true} />
 
       <ScrollView
         contentContainerStyle={styles.content}
