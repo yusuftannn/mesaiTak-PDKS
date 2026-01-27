@@ -1,88 +1,70 @@
+import { useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import PageHeader from "../../src/components/PageHeader";
-
-/* mock data */
-const weeklyShifts = [
-  {
-    day: "Pazartesi",
-    date: "22.01.2026",
-    start: "09:00",
-    end: "18:00",
-    type: "Gündüz",
-  },
-  {
-    day: "Salı",
-    date: "23.01.2026",
-    start: "09:00",
-    end: "18:00",
-    type: "Gündüz",
-  },
-  {
-    day: "Çarşamba",
-    date: "24.01.2026",
-    start: "13:00",
-    end: "22:00",
-    type: "Akşam",
-  },
-  {
-    day: "Perşembe",
-    date: "25.01.2026",
-    start: "09:00",
-    end: "18:00",
-    type: "Gündüz",
-  },
-  {
-    day: "Cuma",
-    date: "26.01.2026",
-    start: "09:00",
-    end: "18:00",
-    type: "Gündüz",
-  },
-];
+import { useAuthStore } from "../../src/store/auth.store";
+import { useShiftStore } from "../../src/store/shift.store";
 
 export default function Shift() {
+  const user = useAuthStore((s) => s.user);
+  const { loading, shifts, todayShift, loadShifts } = useShiftStore();
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    loadShifts(user.uid);
+  }, [user?.uid]);
+
   return (
     <View style={styles.container}>
-      <PageHeader title="Vardiya" showBack={true} />
+      <PageHeader title="Vardiya" showBack={false} />
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.todayCard}>
           <View style={styles.todayRow}>
             <Ionicons name="calendar-outline" size={24} color="#2563EB" />
             <Text style={styles.todayTitle}>Bugünkü Vardiya</Text>
           </View>
 
-          <Text style={styles.todayTime}>09:00 → 18:00</Text>
-
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>Gündüz</Text>
-          </View>
+          {todayShift ? (
+            <>
+              <Text style={styles.todayTime}>
+                {todayShift.startTime} → {todayShift.endTime}
+              </Text>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {todayShift.type === "day" ? "Gündüz" : "Gece"}
+                </Text>
+              </View>
+            </>
+          ) : (
+            <Text style={styles.emptyText}>Bugün vardiya yok</Text>
+          )}
         </View>
 
-        <Text style={styles.sectionTitle}>Haftalık Vardiya Planı</Text>
+        <Text style={styles.sectionTitle}>Tüm Vardiyalar</Text>
 
-        {weeklyShifts.map((s, index) => (
-          <View key={index} style={styles.card}>
-            <View style={styles.row}>
-              <View>
-                <Text style={styles.day}>{s.day}</Text>
-                <Text style={styles.date}>{s.date}</Text>
-              </View>
+        {loading && <Text style={styles.subText}>Yükleniyor…</Text>}
 
-              <View style={styles.right}>
-                <Text style={styles.time}>
-                  {s.start} → {s.end}
-                </Text>
-                <Text style={styles.type}>{s.type}</Text>
+        {!loading &&
+          shifts.map((s) => (
+            <View key={s.id} style={styles.card}>
+              <View style={styles.row}>
+                <View>
+                  <Text style={styles.day}>{s.date}</Text>
+                </View>
+
+                <View style={styles.right}>
+                  <Text style={styles.time}>
+                    {s.startTime} → {s.endTime}
+                  </Text>
+                  <Text style={styles.type}>
+                    {s.type === "day" ? "Gündüz" : "Gece"}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        ))}
+          ))}
       </ScrollView>
     </View>
   );
@@ -139,7 +121,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
   },
-
+  subText: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
   sectionTitle: {
     fontSize: 15,
     fontWeight: "600",

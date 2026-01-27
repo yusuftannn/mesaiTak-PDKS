@@ -1,26 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 
 import PageHeader from "../../src/components/PageHeader";
 import AppButton from "../../src/components/AppButton";
-
-/* mock data */
-const leaveHistory = [
-  {
-    type: "Yıllık İzin",
-    start: "10.02.2026",
-    end: "14.02.2026",
-    status: "pending",
-  },
-  {
-    type: "Mazeret İzni",
-    start: "05.01.2026",
-    end: "05.01.2026",
-    status: "approved",
-  },
-];
+import { useAuthStore } from "../../src/store/auth.store";
+import { useLeaveStore } from "../../src/store/leave.store";
 
 function mapStatus(status: string) {
   switch (status) {
@@ -34,25 +20,46 @@ function mapStatus(status: string) {
 }
 
 export default function Leave() {
-  const [leaveType, setLeaveType] = useState("yillik");
+  const user = useAuthStore((s) => s.user);
+  const { leaves, loading, loadLeaves, submitLeave } = useLeaveStore();
+
+  const [type, setType] = useState<"yillik" | "mazeret" | "ucretsiz">("yillik");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [note, setNote] = useState("");
 
+  useEffect(() => {
+    if (!user?.uid) return;
+    loadLeaves(user.uid);
+  }, [user?.uid]);
+
+  const handleSubmit = async () => {
+    if (!user?.uid) return;
+    if (!startDate || !endDate) return;
+
+    await submitLeave(user.uid, {
+      type,
+      startDate,
+      endDate,
+      note,
+    });
+
+    setStartDate("");
+    setEndDate("");
+    setNote("");
+  };
+
   return (
     <View style={styles.container}>
-      <PageHeader title="İzin" showBack={true} />
+      <PageHeader title="İzin" showBack={false} />
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>İzin Talebi Oluştur</Text>
 
           <Text style={styles.label}>İzin Türü</Text>
           <View style={styles.pickerWrapper}>
-            <Picker selectedValue={leaveType} onValueChange={setLeaveType}>
+            <Picker selectedValue={type} onValueChange={setType}>
               <Picker.Item label="Yıllık İzin" value="yillik" />
               <Picker.Item label="Mazeret İzni" value="mazeret" />
               <Picker.Item label="Ücretsiz İzin" value="ucretsiz" />
@@ -61,7 +68,7 @@ export default function Leave() {
 
           <Text style={styles.label}>Başlangıç Tarihi</Text>
           <TextInput
-            placeholder="GG.AA.YYYY"
+            placeholder="YYYY-MM-DD"
             style={styles.input}
             value={startDate}
             onChangeText={setStartDate}
@@ -69,7 +76,7 @@ export default function Leave() {
 
           <Text style={styles.label}>Bitiş Tarihi</Text>
           <TextInput
-            placeholder="GG.AA.YYYY"
+            placeholder="YYYY-MM-DD"
             style={styles.input}
             value={endDate}
             onChangeText={setEndDate}
@@ -77,7 +84,6 @@ export default function Leave() {
 
           <Text style={styles.label}>Açıklama</Text>
           <TextInput
-            placeholder="Açıklama (opsiyonel)"
             style={[styles.input, { height: 80 }]}
             multiline
             value={note}
@@ -86,24 +92,19 @@ export default function Leave() {
 
           <AppButton
             title="İzin Talebi Gönder"
+            onPress={handleSubmit}
+            disabled={loading}
             icon={<Ionicons name="send" size={18} color="#fff" />}
-            onPress={() => {
-              // Firestore’a yazacağız
-            }}
           />
         </View>
 
         <Text style={styles.sectionTitle}>İzin Geçmişim</Text>
 
-        {leaveHistory.length === 0 && (
-          <Text style={styles.subText}>Henüz izin talebiniz yok</Text>
-        )}
-
-        {leaveHistory.map((l, index) => {
+        {leaves.map((l) => {
           const status = mapStatus(l.status);
 
           return (
-            <View key={index} style={styles.historyCard}>
+            <View key={l.id} style={styles.historyCard}>
               <View style={styles.row}>
                 <Text style={styles.type}>{l.type}</Text>
                 <Text style={[styles.status, { color: status.color }]}>
@@ -112,7 +113,7 @@ export default function Leave() {
               </View>
 
               <Text style={styles.date}>
-                {l.start} → {l.end}
+                {l.startDate} → {l.endDate}
               </Text>
             </View>
           );
@@ -121,6 +122,7 @@ export default function Leave() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
