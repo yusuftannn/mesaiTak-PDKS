@@ -1,70 +1,37 @@
 import { useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import PageHeader from "../../src/components/PageHeader";
-import { useAdminEmployeesStore } from "../../src/store/admin.users.store";
-import RoleBadge from "../../src/components/RoleBadge";
-import { Ionicons } from "@expo/vector-icons";
+import EmployeeCard from "../../src/components/admin/EmployeeCard";
+import { useAdminEmployeesStore } from "../../src/store/adminUsers.store";
+import { router } from "expo-router";
 
 export default function AdminEmployees() {
-  const { users, loading, error, loadUsers } =
-    useAdminEmployeesStore();
+  const { loadEmployees, employees, loading } = useAdminEmployeesStore();
 
   useEffect(() => {
-    loadUsers();
+    loadEmployees();
   }, []);
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
       <PageHeader title="Çalışanlar" showBack={false} />
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {loading && <Text style={styles.loading}>Yükleniyor…</Text>}
+
+      {!loading && employees.length === 0 && (
+        <Text style={styles.empty}>Henüz çalışan bulunmuyor</Text>
+      )}
 
       <FlatList
-        data={users}
+        data={employees}
         keyExtractor={(item) => item.uid}
-        contentContainerStyle={{ padding: 16 }}
-        ItemSeparatorComponent={() => (
-          <View style={{ height: 12 }} />
-        )}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card}>
-            <View style={styles.left}>
-              <Ionicons
-                name="person-circle-outline"
-                size={36}
-                color="#2563EB"
-              />
-              <View>
-                <Text style={styles.name}>
-                  {item.name || "İsimsiz Kullanıcı"}
-                </Text>
-                <Text style={styles.email}>{item.email}</Text>
-              </View>
-            </View>
-
-            <RoleBadge role={item.role} />
-          </TouchableOpacity>
+          <EmployeeCard
+            employee={item}
+            onPress={() => router.push(`/(admin)/employee/${item.uid}`)}
+          />
         )}
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            Henüz çalışan yok
-          </Text>
-        }
+        contentContainerStyle={{ padding: 16 }}
       />
     </View>
   );
@@ -75,46 +42,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F9FAFB",
   },
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    padding: 14,
-    borderRadius: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  left: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  name: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  email: {
-    fontSize: 13,
+
+  loading: {
+    textAlign: "center",
+    marginTop: 12,
     color: "#6B7280",
-    marginTop: 2,
   },
+
   empty: {
     textAlign: "center",
-    color: "#6B7280",
-    marginTop: 40,
-  },
-  error: {
-    color: "#DC2626",
-    textAlign: "center",
-    marginVertical: 8,
+    marginTop: 24,
+    color: "#9CA3AF",
   },
 });

@@ -1,8 +1,7 @@
 import { create } from "zustand";
-import dayjs from "dayjs";
 import { getUserShifts, ShiftDoc } from "../services/shift.service";
 
-type ShiftState = {
+type State = {
   loading: boolean;
   shifts: ShiftDoc[];
   todayShift: ShiftDoc | null;
@@ -10,26 +9,31 @@ type ShiftState = {
   loadShifts: (userId: string) => Promise<void>;
 };
 
-export const useShiftStore = create<ShiftState>((set) => ({
+export const useShiftStore = create<State>((set) => ({
   loading: true,
   shifts: [],
   todayShift: null,
 
   loadShifts: async (userId) => {
-    set({ loading: true });
-
     try {
-      const data = await getUserShifts(userId);
-      const today = dayjs().format("YYYY-MM-DD");
+      set({ loading: true });
+
+      const shifts = await getUserShifts(userId);
+
+      const todayStr = new Date().toDateString();
+
+      const todayShift =
+        shifts.find((s) => {
+          const d = s.date.toDate();
+          return d.toDateString() === todayStr;
+        }) ?? null;
 
       set({
-        shifts: data,
-        todayShift:
-          data.find((s) => s.date === today) ?? null,
+        shifts,
+        todayShift,
       });
-    } catch (err) {
-      console.error("loadShifts error:", err);
-      set({ shifts: [], todayShift: null });
+    } catch (e) {
+      console.error("loadShifts error:", e);
     } finally {
       set({ loading: false });
     }

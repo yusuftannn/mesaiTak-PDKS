@@ -79,6 +79,25 @@ export default function AdminLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="shifts"
+        options={{
+          title: "Vardiyalar",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "calendar" : "calendar-outline"}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="employee/[uid]"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

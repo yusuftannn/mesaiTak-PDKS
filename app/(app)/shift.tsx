@@ -31,9 +31,10 @@ export default function Shift() {
               <Text style={styles.todayTime}>
                 {todayShift.startTime} → {todayShift.endTime}
               </Text>
+
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>
-                  {todayShift.type === "day" ? "Gündüz" : "Gece"}
+                  {todayShift.type || "Tanımlı değil"}
                 </Text>
               </View>
             </>
@@ -51,16 +52,22 @@ export default function Shift() {
             <View key={s.id} style={styles.card}>
               <View style={styles.row}>
                 <View>
-                  <Text style={styles.day}>{s.date}</Text>
+                  <Text style={styles.day}>
+                    {s.date?.toDate
+                      ? s.date.toDate().toLocaleDateString("tr-TR", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                        })
+                      : ""}
+                  </Text>
                 </View>
 
                 <View style={styles.right}>
                   <Text style={styles.time}>
                     {s.startTime} → {s.endTime}
                   </Text>
-                  <Text style={styles.type}>
-                    {s.type === "day" ? "Gündüz" : "Gece"}
-                  </Text>
+                  <Text style={styles.type}>{s.type || "Tanımlı değil"}</Text>
                 </View>
               </View>
             </View>
