@@ -1,124 +1,76 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TextInput } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { Ionicons } from "@expo/vector-icons";
-
+import { View, Text, StyleSheet } from "react-native";
 import PageHeader from "../../src/components/PageHeader";
 import AppButton from "../../src/components/AppButton";
+import LeaveRequestModal from "../../src/components/LeaveRequestModal";
+
 import { useAuthStore } from "../../src/store/auth.store";
 import { useLeaveStore } from "../../src/store/leave.store";
 
-function mapStatus(status: string) {
-  switch (status) {
-    case "approved":
-      return { text: "Onaylandı", color: "#16A34A" };
-    case "rejected":
-      return { text: "Reddedildi", color: "#DC2626" };
-    default:
-      return { text: "Beklemede", color: "#F59E0B" };
-  }
-}
-
 export default function Leave() {
   const user = useAuthStore((s) => s.user);
-  const { leaves, loading, loadLeaves, submitLeave } = useLeaveStore();
 
-  const [type, setType] = useState<"yillik" | "mazeret" | "ucretsiz">("yillik");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [note, setNote] = useState("");
+  const { leaves, listenMyLeaves, stopListening, sendLeave, loading } =
+    useLeaveStore();
+
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!user?.uid) return;
-    loadLeaves(user.uid);
+
+    listenMyLeaves(user.uid);
+    return () => stopListening();
   }, [user?.uid]);
-
-  const handleSubmit = async () => {
-    if (!user?.uid) return;
-    if (!startDate || !endDate) return;
-
-    await submitLeave(user.uid, {
-      type,
-      startDate,
-      endDate,
-      note,
-    });
-
-    setStartDate("");
-    setEndDate("");
-    setNote("");
-  };
 
   return (
     <View style={styles.container}>
       <PageHeader title="İzin" showBack={false} />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>İzin Talebi Oluştur</Text>
+      <View style={styles.actions}>
+        <AppButton title="İzin Talep Et" onPress={() => setOpen(true)} />
+      </View>
 
-          <Text style={styles.label}>İzin Türü</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker selectedValue={type} onValueChange={setType}>
-              <Picker.Item label="Yıllık İzin" value="yillik" />
-              <Picker.Item label="Mazeret İzni" value="mazeret" />
-              <Picker.Item label="Ücretsiz İzin" value="ucretsiz" />
-            </Picker>
-          </View>
+      {leaves.length === 0 && (
+        <Text style={styles.empty}>Henüz izin talebiniz yok</Text>
+      )}
 
-          <Text style={styles.label}>Başlangıç Tarihi</Text>
-          <TextInput
-            placeholder="YYYY-MM-DD"
-            style={styles.input}
-            value={startDate}
-            onChangeText={setStartDate}
-          />
+      {leaves.map((l) => (
+        <View key={l.id} style={styles.card}>
+          <Text style={styles.type}>{l.type}</Text>
 
-          <Text style={styles.label}>Bitiş Tarihi</Text>
-          <TextInput
-            placeholder="YYYY-MM-DD"
-            style={styles.input}
-            value={endDate}
-            onChangeText={setEndDate}
-          />
+          <Text style={styles.date}>
+            {l.startDate.toDate().toLocaleDateString("tr-TR")} →{" "}
+            {l.endDate.toDate().toLocaleDateString("tr-TR")}
+          </Text>
 
-          <Text style={styles.label}>Açıklama</Text>
-          <TextInput
-            style={[styles.input, { height: 80 }]}
-            multiline
-            value={note}
-            onChangeText={setNote}
-          />
+          <Text
+            style={[
+              styles.status,
+              l.status === "approved" && { color: "#16A34A" },
+              l.status === "rejected" && { color: "#DC2626" },
+            ]}
+          >
+            {l.status}
+          </Text>
 
-          <AppButton
-            title="İzin Talebi Gönder"
-            onPress={handleSubmit}
-            disabled={loading}
-            icon={<Ionicons name="send" size={18} color="#fff" />}
-          />
+          {l.status === "rejected" && l.rejectReason && (
+            <Text style={styles.rejectReason}>
+              Red Sebebi: {l.rejectReason}
+            </Text>
+          )}
         </View>
+      ))}
 
-        <Text style={styles.sectionTitle}>İzin Geçmişim</Text>
-
-        {leaves.map((l) => {
-          const status = mapStatus(l.status);
-
-          return (
-            <View key={l.id} style={styles.historyCard}>
-              <View style={styles.row}>
-                <Text style={styles.type}>{l.type}</Text>
-                <Text style={[styles.status, { color: status.color }]}>
-                  {status.text}
-                </Text>
-              </View>
-
-              <Text style={styles.date}>
-                {l.startDate} → {l.endDate}
-              </Text>
-            </View>
-          );
-        })}
-      </ScrollView>
+      <LeaveRequestModal
+        visible={open}
+        onClose={() => setOpen(false)}
+        onSubmit={async (data) => {
+          await sendLeave({
+            userId: user!.uid,
+            ...data,
+          });
+        }}
+      />
     </View>
   );
 }
@@ -129,89 +81,48 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
   },
 
-  content: {
-    padding: 20,
-    paddingBottom: 32,
+  actions: {
+    paddingHorizontal: 16,
+    marginTop: 12,
+  },
+
+  empty: {
+    textAlign: "center",
+    marginTop: 40,
+    color: "#6B7280",
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#111827",
-    marginBottom: 12,
-  },
-
-  label: {
-    fontSize: 13,
-    color: "#6B7280",
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
     marginTop: 12,
-    marginBottom: 6,
-  },
-
-  pickerWrapper: {
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#F9FAFB",
-  },
-
-  input: {
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 12,
-    backgroundColor: "#FFFFFF",
-  },
-
-  subText: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginBottom: 12,
-  },
-
-  historyCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
     padding: 16,
-    marginBottom: 12,
+    borderRadius: 12,
     shadowColor: "#000",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: 6,
     elevation: 3,
-  },
-
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
 
   type: {
+    fontWeight: "700",
     fontSize: 15,
-    fontWeight: "600",
-    color: "#111827",
-  },
-
-  status: {
-    fontSize: 13,
-    fontWeight: "600",
+    marginBottom: 4,
   },
 
   date: {
+    color: "#374151",
+  },
+
+  status: {
     marginTop: 6,
+    fontWeight: "600",
+    color: "#2563EB",
+  },
+
+  rejectReason: {
+    marginTop: 6,
+    color: "#DC2626",
     fontSize: 13,
-    color: "#6B7280",
   },
 });

@@ -1,53 +1,60 @@
 import { create } from "zustand";
 import {
-  createLeave,
-  getUserLeaves,
   LeaveDoc,
+  subscribeMyLeaves,
+  createLeave,
 } from "../services/leave.service";
+import { Timestamp } from "firebase/firestore";
 
-type LeaveState = {
-  loading: boolean;
-  leaves: LeaveDoc[];
-
-  loadLeaves: (userId: string) => Promise<void>;
-  submitLeave: (
-    userId: string,
-    payload: {
-      type: LeaveDoc["type"];
-      startDate: string;
-      endDate: string;
-      note?: string;
-    }
-  ) => Promise<void>;
+type SendLeavePayload = {
+  userId: string;
+  startDate: Date;
+  endDate: Date;
+  type: "annual" | "sick" | "unpaid" | "other";
+  reason: string;
 };
 
-export const useLeaveStore = create<LeaveState>((set) => ({
+type State = {
+  loading: boolean;
+  leaves: LeaveDoc[];
+  unsubscribe?: () => void;
+
+  listenMyLeaves: (userId: string) => void;
+  stopListening: () => void;
+  sendLeave: (payload: SendLeavePayload) => Promise<void>;
+};
+
+export const useLeaveStore = create<State>((set, get) => ({
   loading: false,
   leaves: [],
 
-  loadLeaves: async (userId) => {
-    set({ loading: true });
-    try {
-      const data = await getUserLeaves(userId);
-      set({ leaves: data });
-    } catch (err) {
-      console.error("loadLeaves error:", err);
-      set({ leaves: [] });
-    } finally {
-      set({ loading: false });
-    }
+  listenMyLeaves: (userId) => {
+    get().stopListening();
+
+    const unsub = subscribeMyLeaves(userId, (leaves) => {
+      set({ leaves });
+    });
+
+    set({ unsubscribe: unsub });
   },
 
-  submitLeave: async (userId, payload) => {
+  stopListening: () => {
+    const unsub = get().unsubscribe;
+    if (unsub) unsub();
+    set({ unsubscribe: undefined });
+  },
+
+  sendLeave: async (payload) => {
     set({ loading: true });
-    try {
-      await createLeave(userId, payload);
-      const updated = await getUserLeaves(userId);
-      set({ leaves: updated });
-    } catch (err) {
-      console.error("submitLeave error:", err);
-    } finally {
-      set({ loading: false });
-    }
+
+    await createLeave({
+      userId: payload.userId,
+      startDate: Timestamp.fromDate(payload.startDate),
+      endDate: Timestamp.fromDate(payload.endDate),
+      type: payload.type,
+      reason: payload.reason,
+    });
+
+    set({ loading: false });
   },
 }));

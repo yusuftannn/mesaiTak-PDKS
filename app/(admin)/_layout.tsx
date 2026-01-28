@@ -41,7 +41,7 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Panel",
+          title: "Anasayfa",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "speedometer" : "speedometer-outline"}
@@ -65,20 +65,6 @@ export default function AdminLayout() {
           ),
         }}
       />
-
-      <Tabs.Screen
-        name="approvals"
-        options={{
-          title: "Onaylar",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "checkmark-done" : "checkmark-done-outline"}
-              size={22}
-              color={color}
-            />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="shifts"
         options={{
@@ -86,6 +72,19 @@ export default function AdminLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "calendar" : "calendar-outline"}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="leaves"
+        options={{
+          title: "İzinler",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "checkmark-done" : "checkmark-done-outline"}
               size={22}
               color={color}
             />

@@ -42,10 +42,10 @@ export default function AppLayout() {
         },
       })}
     >
-      <Tabs.Screen name="home" />
-      <Tabs.Screen name="break" />
-      <Tabs.Screen name="shift" />
-      <Tabs.Screen name="leave" />
+      <Tabs.Screen name="home" options={{ title: "Anasayfa" }} />
+      <Tabs.Screen name="break" options={{ title: "Mola" }} />
+      <Tabs.Screen name="shift" options={{ title: "Vardiya" }} />
+      <Tabs.Screen name="leave" options={{ title: "İzin" }} />
       <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="edit-profile" options={{ href: null }} />
     </Tabs>
