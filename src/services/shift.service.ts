@@ -14,7 +14,7 @@ export type ShiftDoc = {
   date: Timestamp;
   startTime: string;
   endTime: string;
-  type: "day" | "night" | "overtime";
+  type: "day" | "gece" | "mesai";
 };
 
 const shiftRef = collection(db, "shifts");

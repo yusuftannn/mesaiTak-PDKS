@@ -6,7 +6,7 @@ import {
 } from "../services/adminShifts.service";
 import { updateShift } from "../services/adminShifts.service";
 
-type ShiftType = "normal" | "night" | "overtime";
+type ShiftType = "normal" | "gece" | "mesai";
 
 type State = {
   loading: boolean;
@@ -29,7 +29,7 @@ type State = {
       date: Date;
       startTime: string;
       endTime: string;
-      type: "normal" | "night" | "overtime";
+      type: "normal" | "gece" | "mesai";
     },
   ) => Promise<void>;
 };

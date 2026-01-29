@@ -10,7 +10,7 @@ type SendLeavePayload = {
   userId: string;
   startDate: Date;
   endDate: Date;
-  type: "annual" | "sick" | "unpaid" | "other";
+  type: "yıllık" | "hasta" | "ücretsiz" | "diğer";
   reason: string;
 };
 

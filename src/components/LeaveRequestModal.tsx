@@ -1,4 +1,4 @@
-import { Modal, View, Text, StyleSheet, TextInput } from "react-native";
+import { Modal, View, Text, StyleSheet, TextInput, Alert } from "react-native";
 import { useState } from "react";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -10,7 +10,7 @@ type Props = {
   onSubmit: (payload: {
     startDate: Date;
     endDate: Date;
-    type: "annual" | "sick" | "unpaid" | "other";
+    type: "yıllık" | "hasta" | "ücretsiz" | "diğer";
     reason: string;
   }) => Promise<void>;
 };
@@ -20,9 +20,9 @@ export default function LeaveRequestModal({
   onClose,
   onSubmit,
 }: Props) {
-  const [type, setType] = useState<
-    "annual" | "sick" | "unpaid" | "other"
-  >("annual");
+  const [type, setType] = useState<"yıllık" | "hasta" | "ücretsiz" | "diğer">(
+    "yıllık",
+  );
   const [reason, setReason] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -31,7 +31,21 @@ export default function LeaveRequestModal({
   const [showEnd, setShowEnd] = useState(false);
 
   const submit = async () => {
-    if (!reason.trim()) return;
+    if (!reason.trim()) {
+      Alert.alert(
+        "Eksik Bilgi",
+        "İzin talebi oluşturabilmek için açıklama girmek zorunludur.",
+      );
+      return;
+    }
+
+    if (endDate < startDate) {
+      Alert.alert(
+        "Tarih Hatası",
+        "Bitiş tarihi, başlangıç tarihinden önce olamaz.",
+      );
+      return;
+    }
 
     await onSubmit({
       type,
@@ -52,10 +66,10 @@ export default function LeaveRequestModal({
         <Text style={styles.label}>İzin Türü</Text>
         <View style={styles.pickerWrapper}>
           <Picker selectedValue={type} onValueChange={setType}>
-            <Picker.Item label="Yıllık İzin" value="annual" />
-            <Picker.Item label="Hastalık İzni" value="sick" />
-            <Picker.Item label="Ücretsiz İzin" value="unpaid" />
-            <Picker.Item label="Diğer" value="other" />
+            <Picker.Item label="Yıllık İzin" value="yıllık" />
+            <Picker.Item label="Hastalık İzni" value="hasta" />
+            <Picker.Item label="Ücretsiz İzin" value="ücretsiz" />
+            <Picker.Item label="Diğer" value="diğer" />
           </Picker>
         </View>
 
@@ -76,7 +90,7 @@ export default function LeaveRequestModal({
         <Text style={styles.label}>Açıklama</Text>
         <TextInput
           style={styles.input}
-          placeholder="İzin sebebi"
+          placeholder="İzin sebebi (zorunlu)"
           value={reason}
           onChangeText={setReason}
           multiline

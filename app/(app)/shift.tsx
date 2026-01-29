@@ -15,6 +15,11 @@ export default function Shift() {
     loadShifts(user.uid);
   }, [user?.uid]);
 
+  const capitalize = (text?: string) => {
+    if (!text) return "Tanımlı değil";
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  };
+
   return (
     <View style={styles.container}>
       <PageHeader title="Vardiya" showBack={false} />
@@ -34,7 +39,7 @@ export default function Shift() {
 
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>
-                  {todayShift.type || "Tanımlı değil"}
+                  {capitalize(todayShift.type) || "Tanımlı değil"}
                 </Text>
               </View>
             </>

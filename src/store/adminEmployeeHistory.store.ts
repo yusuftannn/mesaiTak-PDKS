@@ -13,22 +13,28 @@ type State = {
 };
 
 export const useAdminEmployeeHistoryStore = create<State>((set) => ({
-  loading: true,
+  loading: false,
   leaves: [],
   shifts: [],
 
   loadHistory: async (userId) => {
-    try {
-      set({ loading: true });
+    set({ loading: true });
 
+    try {
       const [leaves, shifts] = await Promise.all([
         getUserLeaves(userId),
         getUserShifts(userId),
       ]);
 
-      set({ leaves, shifts });
-    } catch (e) {
-      console.error("history load error:", e);
+      set({
+        leaves: leaves ?? [],
+        shifts: shifts ?? [],
+      });
+    } catch (e: any) {
+      set({
+        leaves: [],
+        shifts: [],
+      });
     } finally {
       set({ loading: false });
     }

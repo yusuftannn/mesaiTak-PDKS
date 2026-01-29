@@ -1,5 +1,12 @@
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useState, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import PageHeader from "../../src/components/PageHeader";
 import { useAdminLeavesStore } from "../../src/store/adminLeaves.store";
 import { useAuthStore } from "../../src/store/auth.store";
@@ -12,17 +19,27 @@ export default function AdminLeaves() {
 
   const [selected, setSelected] = useState<LeaveDoc | null>(null);
 
-  useEffect(() => {
-    loadLeaves();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadLeaves();
+    }, []),
+  );
+
+  const pendingLeaves = leaves.filter((l) => l.status === "beklemede");
+  const approvedLeaves = leaves.filter((l) => l.status === "onaylandı");
 
   return (
     <View style={styles.container}>
-      <PageHeader title="İzin Talepleri" />
+      <PageHeader title="İzin Yönetimi" />
 
-      {leaves
-        .filter((l) => l.status === "pending")
-        .map((l) => (
+      <ScrollView>
+        <Text style={styles.sectionTitle}>Bekleyen İzin Talepleri</Text>
+
+        {pendingLeaves.length === 0 && (
+          <Text style={styles.empty}>Bekleyen izin yok</Text>
+        )}
+
+        {pendingLeaves.map((l) => (
           <TouchableOpacity
             key={l.id}
             style={styles.card}
@@ -35,6 +52,24 @@ export default function AdminLeaves() {
             </Text>
           </TouchableOpacity>
         ))}
+
+        <Text style={styles.sectionTitle}>Onaylanan İzinler</Text>
+
+        {approvedLeaves.length === 0 && (
+          <Text style={styles.empty}>Henüz onaylanan izin yok</Text>
+        )}
+
+        {approvedLeaves.map((l) => (
+          <View key={l.id} style={[styles.card, styles.approvedCard]}>
+            <Text style={styles.bold}>{l.type}</Text>
+            <Text>
+              {l.startDate.toDate().toLocaleDateString("tr-TR")} →{" "}
+              {l.endDate.toDate().toLocaleDateString("tr-TR")}
+            </Text>
+            <Text style={styles.approvedText}>Onaylandı</Text>
+          </View>
+        ))}
+      </ScrollView>
 
       <LeaveReviewModal
         visible={!!selected}
@@ -61,11 +96,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F9FAFB",
   },
+  sectionTitle: {
+    marginTop: 16,
+    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  empty: {
+    margin: 12,
+    color: "#6B7280",
+  },
   card: {
     backgroundColor: "#fff",
     margin: 12,
     padding: 16,
     borderRadius: 12,
+  },
+  approvedCard: {
+    backgroundColor: "#ECFDF5",
+  },
+  approvedText: {
+    marginTop: 6,
+    color: "#059669",
+    fontWeight: "600",
   },
   bold: {
     fontWeight: "700",

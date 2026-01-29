@@ -22,11 +22,10 @@ export default function AppButton({
     variant === "primary"
       ? "#2563EB"
       : variant === "danger"
-      ? "#DC2626"
-      : "#E5E7EB";
+        ? "#DC2626"
+        : "#E5E7EB";
 
-  const textColor =
-    variant === "secondary" ? "#111827" : "#FFFFFF";
+  const textColor = variant === "secondary" ? "#111827" : "#FFFFFF";
 
   return (
     <Pressable
@@ -61,6 +60,7 @@ export default function AppButton({
 const styles = StyleSheet.create({
   button: {
     paddingVertical: 14,
+    paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: "center",
     marginVertical: 6,

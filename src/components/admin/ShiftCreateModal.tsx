@@ -25,7 +25,7 @@ export default function ShiftCreateModal({
   const [date, setDate] = useState(new Date());
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("18:00");
-  const [type, setType] = useState<"normal" | "night" | "overtime">("normal");
+  const [type, setType] = useState<"normal" | "gece" | "mesai">("normal");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
@@ -100,8 +100,8 @@ export default function ShiftCreateModal({
         <View style={styles.pickerWrapper}>
           <Picker selectedValue={type} onValueChange={setType}>
             <Picker.Item label="Normal" value="normal" />
-            <Picker.Item label="Gece" value="night" />
-            <Picker.Item label="Fazla Mesai" value="overtime" />
+            <Picker.Item label="Gece" value="gece" />
+            <Picker.Item label="Fazla Mesai" value="mesai" />
           </Picker>
         </View>
 

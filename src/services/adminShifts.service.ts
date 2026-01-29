@@ -19,7 +19,7 @@ export async function createShift(data: {
   date: Date;
   startTime: string;
   endTime: string;
-  type: "normal" | "night" | "overtime";
+  type: "normal" | "gece" | "mesai";
 }) {
   return addDoc(shiftsRef, {
     userId: data.userId,
@@ -52,7 +52,7 @@ export async function updateShift(
     date: Date;
     startTime: string;
     endTime: string;
-    type: "normal" | "night" | "overtime";
+    type: "normal" | "gece" | "mesai";
   },
 ) {
   const ref = doc(db, "shifts", shiftId);

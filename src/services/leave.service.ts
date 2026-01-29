@@ -13,9 +13,9 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
-export type LeaveType = "annual" | "sick" | "unpaid" | "other";
+export type LeaveType = "yıllık" | "hasta" | "ücretsiz" | "diğer";
 
-export type LeaveStatus = "pending" | "approved" | "rejected";
+export type LeaveStatus = "beklemede" | "onaylandı" | "reddedildi";
 
 export type LeaveDoc = {
   id: string;
@@ -42,7 +42,7 @@ export async function createLeave(
 ) {
   return addDoc(leaveRef, {
     ...payload,
-    status: "pending",
+    status: "beklemede",
     createdAt: serverTimestamp(),
   });
 }
@@ -75,7 +75,7 @@ export async function getAllLeaves(): Promise<LeaveDoc[]> {
 export async function approveLeave(leaveId: string, adminId: string) {
   const ref = doc(db, "leaves", leaveId);
   return updateDoc(ref, {
-    status: "approved",
+    status: "onaylandı",
     reviewedBy: adminId,
     reviewedAt: serverTimestamp(),
   });
@@ -88,7 +88,7 @@ export async function rejectLeave(
 ) {
   const ref = doc(db, "leaves", leaveId);
   return updateDoc(ref, {
-    status: "rejected",
+    status: "reddedildi",
     reviewedBy: adminId,
     reviewedAt: serverTimestamp(),
     rejectReason: reason,
