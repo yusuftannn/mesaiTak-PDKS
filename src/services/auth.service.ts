@@ -38,10 +38,12 @@ export async function register(
     name: name ?? null,
 
     role: "employee",
+    status: "active",
+
     companyId: null,
     branchId: null,
-
-    status: "active",
+    country: null,
+    phone: null,
 
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { getUserById, updateUserRole } from "../services/adminUsers.service";
+import {
+  getUserById,
+  updateUserRole,
+  updateEmployee,
+  UpdateEmployeePayload,
+} from "../services/adminUsers.service";
 import { useAdminEmployeesStore } from "./adminUsers.store";
 
 type State = {
@@ -10,6 +15,7 @@ type State = {
 
   loadUser: (uid: string) => Promise<void>;
   changeRole: (role: "employee" | "manager" | "admin") => Promise<void>;
+  updateProfile: (payload: UpdateEmployeePayload) => Promise<void>;
 };
 
 export const useAdminEmployeeDetailStore = create<State>((set, get) => ({
@@ -39,6 +45,24 @@ export const useAdminEmployeeDetailStore = create<State>((set, get) => ({
 
       set({
         user: { ...user, role },
+      });
+
+      await useAdminEmployeesStore.getState().loadEmployees();
+    } finally {
+      set({ saving: false });
+    }
+  },
+
+  updateProfile: async (payload) => {
+    const { user } = get();
+    if (!user) return;
+
+    try {
+      set({ saving: true });
+      await updateEmployee(user.uid, payload);
+
+      set({
+        user: { ...user, ...payload },
       });
 
       await useAdminEmployeesStore.getState().loadEmployees();

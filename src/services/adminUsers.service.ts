@@ -6,6 +6,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -14,9 +15,24 @@ export type AdminUser = {
   email: string;
   name?: string | null;
   role: "employee" | "manager" | "admin";
+
+  companyId?: string | null;
+  companyName?: string | null;
+  branchId?: string | null;
+  branchName?: string | null;
+  country?: string | null;
+  phone?: string | null;
+
+  status?: string;
+  createdAt?: any;
+};
+
+export type UpdateEmployeePayload = {
+  name?: string | null;
   companyId?: string | null;
   branchId?: string | null;
-  createdAt?: any;
+  country?: string | null;
+  phone?: string | null;
 };
 
 export async function getAllUsers(): Promise<AdminUser[]> {
@@ -46,5 +62,20 @@ export async function getUserById(uid: string): Promise<AdminUser> {
 
 export async function updateUserRole(uid: string, role: AdminUser["role"]) {
   const ref = doc(db, "users", uid);
-  return updateDoc(ref, { role });
+  return updateDoc(ref, {
+    role,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function updateEmployee(
+  uid: string,
+  payload: UpdateEmployeePayload,
+) {
+  const ref = doc(db, "users", uid);
+
+  return updateDoc(ref, {
+    ...payload,
+    updatedAt: serverTimestamp(),
+  });
 }

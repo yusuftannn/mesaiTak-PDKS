@@ -2,15 +2,23 @@ import { create } from "zustand";
 
 export type UserRole = "employee" | "manager" | "admin";
 
-export type AuthUser = {
+export interface AuthUser {
   uid: string;
-  email: string;
-  name?: string | null;
-  role: UserRole;
+  email: string | null;
+  name: string | null;
 
-  companyId?: string | null;
-  branchId?: string | null;
-};
+  role: "employee" | "admin";
+  status: "active" | "passive";
+
+  companyId: string | null;
+  branchId: string | null;
+
+  phone: string | null;
+  country: string | null;
+
+  createdAt?: any;
+  updatedAt?: any;
+}
 
 type AuthState = {
   user: AuthUser | null;

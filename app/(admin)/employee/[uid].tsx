@@ -1,22 +1,45 @@
-import { useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  TextInput,
+  ScrollView,
+} from "react-native";
 import { useLocalSearchParams } from "expo-router";
+
 import PageHeader from "../../../src/components/PageHeader";
+import AppButton from "../../../src/components/AppButton";
+
 import { useAdminEmployeeDetailStore } from "../../../src/store/adminEmployeeDetail.store";
 import { useAdminEmployeeHistoryStore } from "../../../src/store/adminEmployeeHistory.store";
-import AppButton from "../../../src/components/AppButton";
+import { Picker } from "@react-native-picker/picker";
+import { Company, getCompanies } from "../../../src/services/company.service";
+import {
+  Branch,
+  getBranchesByCompany,
+} from "../../../src/services/branch.service";
 
 export default function EmployeeDetail() {
   const { uid } = useLocalSearchParams<{ uid: string }>();
 
-  const { loadUser, changeRole, user, loading, saving } =
+  const { loadUser, changeRole, updateProfile, user, loading, saving } =
     useAdminEmployeeDetailStore();
+
   const {
     loadHistory,
     leaves,
     shifts,
     loading: historyLoading,
   } = useAdminEmployeeHistoryStore();
+
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [branchId, setBranchId] = useState<string | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [country, setCountry] = useState("");
+  const [phone, setPhone] = useState("");
 
   useEffect(() => {
     if (uid) loadUser(uid);
@@ -25,6 +48,43 @@ export default function EmployeeDetail() {
   useEffect(() => {
     if (uid) loadHistory(uid);
   }, [uid]);
+
+  useEffect(() => {
+    getCompanies().then((data) => {
+      setCompanies(data);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!companyId) {
+      setBranches([]);
+      setBranchId(null);
+      return;
+    }
+
+    getBranchesByCompany(companyId).then((data) => {
+      console.log("BRANCHES:", data);
+      setBranches(data);
+    });
+  }, [companyId]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    setCompanyId(user.companyId);
+    setBranchId(user.branchId);
+    setCountry(user.country ?? "");
+    setPhone(user.phone ?? "");
+  }, [user]);
+
+  const saveInfo = async () => {
+    await updateProfile({
+      companyId: companyId || null,
+      branchId: branchId || null,
+      country: country || null,
+      phone: phone || null,
+    });
+  };
 
   if (loading || !user) {
     return (
@@ -35,7 +95,7 @@ export default function EmployeeDetail() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <PageHeader title="Çalışan Detayı" />
 
       <View style={styles.card}>
@@ -68,8 +128,44 @@ export default function EmployeeDetail() {
           onPress={() => changeRole("admin")}
         />
 
-        {saving && <Text style={styles.saving}>Kaydediliyor…</Text>}
+        {saving && <Text style={styles.saving}>Rol kaydediliyor…</Text>}
       </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Çalışan Bilgileri</Text>
+
+        <Text style={styles.label}>Şirket</Text>
+        <Picker selectedValue={companyId} onValueChange={setCompanyId}>
+          <Picker.Item label="Şirket seç" value={null} />
+          {companies.map((c) => (
+            <Picker.Item key={c.id} label={c.name} value={c.id} />
+          ))}
+        </Picker>
+
+        <Text style={styles.label}>Şube</Text>
+        <Picker
+          selectedValue={branchId}
+          onValueChange={setBranchId}
+          enabled={!!companyId}
+        >
+          <Picker.Item label="Şube seç" value={null} />
+          {branches.map((b) => (
+            <Picker.Item key={b.id} label={b.name} value={b.id} />
+          ))}
+        </Picker>
+        <Field label="Ülke" value={country} onChange={setCountry} />
+        <Field
+          label="Telefon"
+          value={phone}
+          onChange={setPhone}
+          keyboardType="phone-pad"
+        />
+
+        <AppButton title="Bilgileri Kaydet" onPress={saveInfo} />
+
+        {saving && <Text style={styles.saving}>Bilgiler kaydediliyor…</Text>}
+      </View>
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>İzin Geçmişi</Text>
 
@@ -85,7 +181,7 @@ export default function EmployeeDetail() {
           </View>
         ))}
       </View>
-      {historyLoading && <Text style={styles.loading}>Geçmiş yükleniyor…</Text>}
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Vardiya Geçmişi</Text>
 
@@ -100,7 +196,35 @@ export default function EmployeeDetail() {
             </Text>
           </View>
         ))}
+
+        {historyLoading && (
+          <Text style={styles.loading}>Geçmiş yükleniyor…</Text>
+        )}
       </View>
+    </ScrollView>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  keyboardType,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  keyboardType?: "default" | "phone-pad";
+}) {
+  return (
+    <View style={styles.field}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <TextInput
+        value={value}
+        onChangeText={onChange}
+        style={styles.input}
+        keyboardType={keyboardType}
+      />
     </View>
   );
 }
@@ -136,7 +260,10 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     marginTop: 4,
   },
-
+  label: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
   badge: {
     marginTop: 12,
     backgroundColor: "#E5E7EB",
@@ -165,6 +292,24 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#6B7280",
   },
+
+  field: {
+    marginBottom: 12,
+  },
+
+  fieldLabel: {
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+
+  input: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
   row: {
     backgroundColor: "#fff",
     padding: 12,
@@ -177,6 +322,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 8,
   },
+
   loading: {
     textAlign: "center",
     color: "#6B7280",
