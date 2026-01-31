@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "600",
+    textTransform: "capitalize",
   },
   subText: {
     fontSize: 14,
@@ -190,5 +191,6 @@ const styles = StyleSheet.create({
   type: {
     fontSize: 13,
     color: "#6B7280",
+    textTransform: "capitalize",
   },
 });

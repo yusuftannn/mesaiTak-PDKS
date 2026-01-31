@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TextInput } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
@@ -28,7 +28,7 @@ export default function Profile() {
       try {
         if (user.companyId) {
           const companySnap = await getDoc(
-            doc(db, "companies", user.companyId)
+            doc(db, "companies", user.companyId),
           );
           if (companySnap.exists()) {
             setCompanyName(companySnap.data().name);
@@ -36,9 +36,7 @@ export default function Profile() {
         }
 
         if (user.branchId) {
-          const branchSnap = await getDoc(
-            doc(db, "branches", user.branchId)
-          );
+          const branchSnap = await getDoc(doc(db, "branches", user.branchId));
           if (branchSnap.exists()) {
             setBranchName(branchSnap.data().name);
           }
@@ -76,8 +74,6 @@ export default function Profile() {
         <View style={styles.header}>
           <Ionicons name="person-circle" size={88} color="#2563EB" />
 
-          <Text style={styles.label}>Ad Soyad</Text>
-
           {editingName ? (
             <View style={styles.inlineRow}>
               <TextInput
@@ -108,8 +104,8 @@ export default function Profile() {
             <View style={styles.inlineRow}>
               <Text style={styles.value}>{user?.name}</Text>
 
-              <Ionicons
-                name="pencil"
+              <Feather
+                name="edit"
                 size={16}
                 color="#6B7280"
                 onPress={() => setEditingName(true)}
@@ -125,14 +121,10 @@ export default function Profile() {
           <Text style={styles.value}>{user?.role ?? "-"}</Text>
 
           <Text style={styles.label}>Şirket</Text>
-          <Text style={styles.value}>
-            {companyName ?? "Tanımlı değil"}
-          </Text>
+          <Text style={styles.value}>{companyName ?? "Tanımlı değil"}</Text>
 
           <Text style={styles.label}>Şube</Text>
-          <Text style={styles.value}>
-            {branchName ?? "Tanımlı değil"}
-          </Text>
+          <Text style={styles.value}>{branchName ?? "Tanımlı değil"}</Text>
 
           <Text style={styles.label}>Telefon</Text>
           <Text style={styles.value}>{user?.phone ?? "-"}</Text>

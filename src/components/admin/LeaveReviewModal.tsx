@@ -1,7 +1,7 @@
 import { Modal, View, Text, StyleSheet, TextInput } from "react-native";
 import AppButton from "../AppButton";
 import { LeaveDoc } from "../../services/leave.service";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Props = {
   visible: boolean;
@@ -19,6 +19,12 @@ export default function LeaveReviewModal({
   onClose,
 }: Props) {
   const [reason, setReason] = useState("");
+
+  useEffect(() => {
+    if (!visible) {
+      setReason("");
+    }
+  }, [visible]);
 
   if (!leave) return null;
 
@@ -52,6 +58,7 @@ export default function LeaveReviewModal({
           <AppButton
             title="Reddet"
             variant="danger"
+            disabled={!reason.trim()}
             onPress={() => onReject(reason)}
           />
           <AppButton title="Kapat" variant="secondary" onPress={onClose} />

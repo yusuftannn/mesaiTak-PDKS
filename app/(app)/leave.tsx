@@ -185,6 +185,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     color: "#0F172A",
+    textTransform: "capitalize",
   },
 
   badge: {
@@ -200,6 +201,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: "600",
+    
   },
 
   success: {

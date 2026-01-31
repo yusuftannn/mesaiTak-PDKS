@@ -63,7 +63,6 @@ export default function EmployeeDetail() {
     }
 
     getBranchesByCompany(companyId).then((data) => {
-      console.log("BRANCHES:", data);
       setBranches(data);
     });
   }, [companyId]);

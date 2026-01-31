@@ -1,5 +1,5 @@
 import { Modal, View, Text, StyleSheet, TextInput, Alert } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AppButton from "./AppButton";
@@ -30,6 +30,17 @@ export default function LeaveRequestModal({
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
 
+  useEffect(() => {
+    if (!visible) {
+      setReason("");
+      setType("yıllık");
+      setStartDate(new Date());
+      setEndDate(new Date());
+      setShowStart(false);
+      setShowEnd(false);
+    }
+  }, [visible]);
+
   const submit = async () => {
     if (!reason.trim()) {
       Alert.alert(
@@ -54,7 +65,6 @@ export default function LeaveRequestModal({
       endDate,
     });
 
-    setReason("");
     onClose();
   };
 
@@ -96,7 +106,7 @@ export default function LeaveRequestModal({
           multiline
         />
 
-        <AppButton title="Gönder" onPress={submit} />
+        <AppButton title="Gönder" disabled={!reason.trim()} onPress={submit} />
         <AppButton title="İptal" variant="secondary" onPress={onClose} />
 
         {showStart && (

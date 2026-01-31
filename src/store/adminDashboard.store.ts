@@ -36,9 +36,9 @@ export const useAdminDashboardStore = create<DashboardState>((set) => ({
 
       const attendances = attendanceSnap.docs.map((d) => d.data());
 
-      const working = attendances.filter((a) => a.status === "working").length;
+      const working = attendances.filter((a) => a.status === "çalışıyor").length;
 
-      const onBreak = attendances.filter((a) => a.status === "break").length;
+      const onBreak = attendances.filter((a) => a.status === "mola").length;
 
       set({
         totalEmployees: usersSnap.size,

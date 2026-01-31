@@ -30,7 +30,7 @@ export async function startWork(uid: string, date: string) {
     checkInAt: serverTimestamp(),
     checkOutAt: null,
     breaks: [],
-    status: "working",
+    status: "çalışıyor",
     createdAt: serverTimestamp(),
   });
 }
@@ -38,7 +38,7 @@ export async function startWork(uid: string, date: string) {
 export async function endWork(attendanceId: string) {
   return updateDoc(doc(db, "attendance", attendanceId), {
     checkOutAt: serverTimestamp(),
-    status: "completed",
+    status: "tamamlandı",
   });
 }
 
@@ -57,7 +57,7 @@ export async function startBreak(
         end: null,
       },
     ],
-    status: "break",
+    status: "mola",
   });
 }
 
@@ -74,6 +74,6 @@ export async function endBreak(
 
   return updateDoc(doc(db, "attendance", attendanceId), {
     breaks: updated,
-    status: "working",
+    status: "çalışıyor",
   });
 }

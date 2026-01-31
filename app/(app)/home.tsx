@@ -299,9 +299,10 @@ const styles = StyleSheet.create({
   },
 
   statusText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: "#1E3A8A",
+    textTransform: "capitalize",
   },
 
   subText: {
