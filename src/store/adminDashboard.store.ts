@@ -1,10 +1,17 @@
 import { create } from "zustand";
 import dayjs from "dayjs";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  FirestoreError,
+} from "firebase/firestore";
 import { db } from "../services/firebase";
 
 type DashboardState = {
   loading: boolean;
+  error: string | null;
 
   totalEmployees: number;
   workingCount: number;
@@ -15,7 +22,8 @@ type DashboardState = {
 };
 
 export const useAdminDashboardStore = create<DashboardState>((set) => ({
-  loading: true,
+  loading: false,
+  error: null,
 
   totalEmployees: 0,
   workingCount: 0,
@@ -23,9 +31,9 @@ export const useAdminDashboardStore = create<DashboardState>((set) => ({
   activeCount: 0,
 
   loadDashboard: async () => {
-    try {
-      set({ loading: true });
+    set({ loading: true, error: null });
 
+    try {
       const today = dayjs().format("YYYY-MM-DD");
 
       const usersSnap = await getDocs(collection(db, "users"));
@@ -36,9 +44,11 @@ export const useAdminDashboardStore = create<DashboardState>((set) => ({
 
       const attendances = attendanceSnap.docs.map((d) => d.data());
 
-      const working = attendances.filter((a) => a.status === "çalışıyor").length;
+      const working = attendances.filter(
+        (a) => a?.status === "çalışıyor",
+      ).length;
 
-      const onBreak = attendances.filter((a) => a.status === "mola").length;
+      const onBreak = attendances.filter((a) => a?.status === "mola").length;
 
       set({
         totalEmployees: usersSnap.size,
@@ -47,7 +57,25 @@ export const useAdminDashboardStore = create<DashboardState>((set) => ({
         activeCount: working + onBreak,
       });
     } catch (err) {
-      console.error("Admin dashboard error:", err);
+      const error = err as FirestoreError;
+
+      console.error("Admin dashboard error:", error);
+
+      if (error.code === "permission-denied") {
+        set({
+          error: "Bu verileri görüntüleme yetkiniz yok.",
+        });
+      } else if (error.code?.startsWith("auth/")) {
+        set({
+          error: "Oturum süreniz dolmuş olabilir.",
+        });
+      } else {
+        set({
+          error: "Dashboard verileri yüklenemedi.",
+        });
+      }
+
+      throw error;
     } finally {
       set({ loading: false });
     }

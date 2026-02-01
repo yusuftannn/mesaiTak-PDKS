@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, FirestoreError } from "firebase/firestore";
 import { db } from "../services/firebase";
 
 export type Employee = {
@@ -11,19 +11,21 @@ export type Employee = {
 
 type State = {
   loading: boolean;
+  error: string | null;
   employees: Employee[];
 
   loadEmployees: () => Promise<void>;
 };
 
 export const useAdminEmployeesStore = create<State>((set) => ({
-  loading: true,
+  loading: false,
+  error: null,
   employees: [],
 
   loadEmployees: async () => {
-    try {
-      set({ loading: true });
+    set({ loading: true, error: null });
 
+    try {
       const snap = await getDocs(collection(db, "users"));
 
       const list: Employee[] = snap.docs.map((doc) => {
@@ -39,7 +41,18 @@ export const useAdminEmployeesStore = create<State>((set) => ({
 
       set({ employees: list });
     } catch (err) {
-      console.error("loadEmployees error:", err);
+      const error = err as FirestoreError;
+
+      console.error("loadEmployees error:", error);
+
+      if (error.code === "permission-denied") {
+        set({ error: "Çalışanları görüntüleme yetkiniz yok." });
+      } else if (error.code?.startsWith("auth/")) {
+        set({ error: "Oturum süreniz dolmuş olabilir." });
+      } else {
+        set({ error: "Çalışan listesi yüklenemedi." });
+      }
+      throw error;
     } finally {
       set({ loading: false });
     }

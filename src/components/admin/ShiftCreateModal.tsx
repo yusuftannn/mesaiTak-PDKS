@@ -1,7 +1,8 @@
-import { Modal, View, Text, StyleSheet, Platform } from "react-native";
+import { Modal, View, Text, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
+
 import AppButton from "../AppButton";
 import { useAdminShiftsStore } from "../../store/adminShifts.store";
 import { AdminUser } from "../../services/adminUsers.service";
@@ -19,19 +20,21 @@ export default function ShiftCreateModal({
   employees,
   shift,
 }: Props) {
-  const { addShift, editShift, saving, removeShift } = useAdminShiftsStore();
+  const { addShift, editShift, removeShift, saving } = useAdminShiftsStore();
 
-  const [userId, setUserId] = useState<string>();
+  const [userId, setUserId] = useState<string | undefined>();
   const [date, setDate] = useState(new Date());
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("18:00");
   const [type, setType] = useState<"normal" | "gece" | "mesai">("normal");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  const [formError, setFormError] = useState<string | null>(null);
+
   useEffect(() => {
     if (shift) {
       setUserId(shift.userId);
-      setDate(shift.date.toDate ? shift.date.toDate() : new Date());
+      setDate(shift.date?.toDate ? shift.date.toDate() : new Date());
       setStartTime(shift.startTime);
       setEndTime(shift.endTime);
       setType(shift.type);
@@ -45,11 +48,22 @@ export default function ShiftCreateModal({
       setStartTime("09:00");
       setEndTime("18:00");
       setType("normal");
+      setFormError(null);
     }
   }, [visible]);
 
   const submit = async () => {
-    if (!userId) return;
+    setFormError(null);
+
+    if (!userId) {
+      setFormError("Lütfen bir çalışan seçin.");
+      return;
+    }
+
+    if (startTime >= endTime) {
+      setFormError("Başlangıç saati, bitiş saatinden önce olmalıdır.");
+      return;
+    }
 
     const payload = {
       userId,
@@ -59,14 +73,34 @@ export default function ShiftCreateModal({
       type,
     };
 
-    if (shift) {
-      await editShift(shift.id, payload);
-    } else {
-      await addShift(payload);
-    }
+    try {
+      if (shift) {
+        await editShift(shift.id, payload);
+      } else {
+        await addShift(payload);
+      }
 
-    onClose();
+      onClose();
+    } catch (err) {
+      console.error("Shift submit error:", err);
+      setFormError("Vardiya kaydedilemedi. Lütfen tekrar deneyin.");
+    }
   };
+
+  const handleDelete = async () => {
+    if (!shift) return;
+
+    setFormError(null);
+
+    try {
+      await removeShift(shift.id);
+      onClose();
+    } catch (err) {
+      console.error("removeShift error:", err);
+      setFormError("Vardiya silinemedi.");
+    }
+  };
+
   return (
     <Modal visible={visible} animationType="slide">
       <View style={styles.container}>
@@ -89,7 +123,6 @@ export default function ShiftCreateModal({
         </View>
 
         <Text style={styles.label}>Tarih</Text>
-
         <AppButton
           title={date.toLocaleDateString("tr-TR")}
           variant="secondary"
@@ -105,7 +138,7 @@ export default function ShiftCreateModal({
           </Picker>
         </View>
 
-        <Text style={styles.label}>Başlangıç</Text>
+        <Text style={styles.label}>Saatler</Text>
         <View style={styles.timeRow}>
           <Picker
             selectedValue={startTime}
@@ -134,23 +167,30 @@ export default function ShiftCreateModal({
           </Picker>
         </View>
 
+        {formError && <Text style={styles.errorText}>{formError}</Text>}
+
         <AppButton
           title={saving ? "Kaydediliyor..." : "Kaydet"}
           onPress={submit}
           disabled={saving}
         />
 
-        <AppButton title="İptal" variant="secondary" onPress={onClose} />
+        <AppButton
+          title="İptal"
+          variant="secondary"
+          onPress={onClose}
+          disabled={saving}
+        />
+
         {shift && (
           <AppButton
             title="Vardiyayı Sil"
             variant="danger"
-            onPress={async () => {
-              await removeShift(shift.id);
-              onClose();
-            }}
+            onPress={handleDelete}
+            disabled={saving}
           />
         )}
+
         {showDatePicker && (
           <DateTimePicker
             value={date}
@@ -158,10 +198,7 @@ export default function ShiftCreateModal({
             display="default"
             onChange={(_, selectedDate) => {
               setShowDatePicker(false);
-
-              if (selectedDate) {
-                setDate(selectedDate);
-              }
+              if (selectedDate) setDate(selectedDate);
             }}
           />
         )}
@@ -176,27 +213,43 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#F9FAFB",
   },
+
   title: {
     fontSize: 20,
     fontWeight: "700",
     marginBottom: 12,
   },
+
   label: {
     marginTop: 12,
     marginBottom: 4,
     fontWeight: "600",
   },
+
   pickerWrapper: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    overflow: "hidden",
   },
+
   timeRow: {
     flexDirection: "row",
     gap: 8,
   },
+
   timePicker: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
+  },
+
+  errorText: {
+    marginTop: 8,
+    marginBottom: 8,
+    color: "#DC2626",
+    fontSize: 13,
+    fontWeight: "600",
   },
 });
