@@ -14,6 +14,10 @@ import { db } from "./firebase";
 
 const shiftsRef = collection(db, "shifts");
 
+function normalizeDate(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
 export async function createShift(data: {
   userId: string;
   date: Date;
@@ -23,7 +27,7 @@ export async function createShift(data: {
 }) {
   return addDoc(shiftsRef, {
     userId: data.userId,
-    date: data.date,
+    date: normalizeDate(data.date),
     startTime: data.startTime,
     endTime: data.endTime,
     type: data.type,

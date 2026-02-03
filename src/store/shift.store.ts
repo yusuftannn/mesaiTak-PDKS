@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import { getUserShifts, ShiftDoc } from "../services/shift.service";
 
+function toYMD(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 type State = {
   loading: boolean;
   shifts: ShiftDoc[];
@@ -20,13 +27,12 @@ export const useShiftStore = create<State>((set) => ({
 
       const shifts = await getUserShifts(userId);
 
-      const todayStr = new Date().toDateString();
+      const todayYMD = toYMD(new Date());
 
       const todayShift =
-        shifts.find((s) => {
-          const d = s.date.toDate();
-          return d.toDateString() === todayStr;
-        }) ?? null;
+        shifts.find((s) => toYMD(s.date.toDate()) === todayYMD) ?? null;
+
+      console.log("todayShift FOUND:", todayShift);
 
       set({
         shifts,
