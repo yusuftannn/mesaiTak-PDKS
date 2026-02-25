@@ -30,7 +30,15 @@ export async function getTodayAttendance(uid: string, date: string) {
   return snap.docs[0] ?? null;
 }
 
-export async function startWork(uid: string, date: string) {
+export async function startWork(
+  uid: string,
+  date: string,
+  location: {
+    lat: number;
+    lng: number;
+    accuracy?: number;
+  } | null,
+) {
   const shift = await getUserTodayShift(uid);
 
   return addDoc(attendanceRef, {
@@ -38,10 +46,14 @@ export async function startWork(uid: string, date: string) {
     date,
     shiftStart: shift?.startTime ?? null,
     shiftEnd: shift?.endTime ?? null,
+
     checkInAt: serverTimestamp(),
     checkOutAt: null,
     breaks: [],
     status: "çalışıyor",
+
+    checkInLocation: location ?? null,
+
     createdAt: serverTimestamp(),
   });
 }

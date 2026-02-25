@@ -4,7 +4,21 @@
     "slug": "mesaitak",
     "scheme": "mesaitak",
     "plugins": ["expo-router"],
-    "ios": { "bundleIdentifier": "com.mesaitak.app" },
-    "android": { "package": "com.mesaitak.app" }
+
+    "ios": {
+      "bundleIdentifier": "com.mesaitak.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Mesai başlangıcında konum doğrulaması için kullanılır.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Vardiya süresince konum doğrulaması için kullanılabilir."
+      }
+    },
+
+    "android": {
+      "package": "com.mesaitak.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    }
   }
 }

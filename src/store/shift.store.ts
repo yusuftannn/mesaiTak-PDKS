@@ -32,7 +32,6 @@ export const useShiftStore = create<State>((set) => ({
       const todayShift =
         shifts.find((s) => toYMD(s.date.toDate()) === todayYMD) ?? null;
 
-      console.log("todayShift FOUND:", todayShift);
 
       set({
         shifts,

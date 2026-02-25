@@ -8,6 +8,7 @@ import {
   endBreak as fsEndBreak,
 } from "../services/attendance.service";
 import { diffMinutes } from "../utils/time";
+import * as Location from "expo-location";
 
 type BreakItem = {
   type: string;
@@ -136,8 +137,34 @@ export const useHomeStore = create<HomeState>((set, get) => ({
 
   startWork: async (uid) => {
     set({ loading: true });
+
     const today = dayjs().format("YYYY-MM-DD");
-    const ref = await fsStartWork(uid, today);
+
+    let locationData: {
+      lat: number;
+      lng: number;
+      accuracy?: number;
+    } | null = null;
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status === "granted") {
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+
+        locationData = {
+          lat: loc.coords.latitude,
+          lng: loc.coords.longitude,
+          accuracy: loc.coords.accuracy ?? undefined,
+        };
+      }
+    } catch (err) {
+      console.log("Location error:", err);
+    }
+
+    const ref = await fsStartWork(uid, today, locationData);
 
     set({
       attendanceDocId: ref.id,
