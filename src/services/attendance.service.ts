@@ -58,12 +58,24 @@ export async function startWork(
   });
 }
 
-export async function endWork(attendanceId: string) {
-  return updateDoc(doc(db, "attendance", attendanceId), {
-    checkOutAt: serverTimestamp(),
-    status: "tamamlandı",
-  });
-}
+  export const endWork = async (
+    docId: string,
+    locationData: {
+      lat: number;
+      lng: number;
+      accuracy?: number;
+    }
+  ) => {
+    if (!locationData?.lat || !locationData?.lng) {
+      throw new Error("Location required");
+    }
+
+    return updateDoc(doc(db, "attendance", docId), {
+      status: "tamamlandı",
+      checkOutAt: serverTimestamp(),
+      checkOutLocation: locationData,
+    });
+  };
 
 // Mola başlat
 export async function startBreak(

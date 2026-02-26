@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import dayjs from "dayjs";
+import { Linking, Platform, Alert } from "react-native";
 import {
   getTodayAttendance,
   startWork as fsStartWork,
@@ -140,42 +141,85 @@ export const useHomeStore = create<HomeState>((set, get) => ({
 
     const today = dayjs().format("YYYY-MM-DD");
 
-    let locationData: {
-      lat: number;
-      lng: number;
-      accuracy?: number;
-    } | null = null;
-
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status === "granted") {
-        const loc = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
+      if (status !== "granted") {
+        Alert.alert(
+          "Konum İzni Gerekli",
+          "Mesai başlatmak için konum izni vermeniz gerekiyor.",
+          [
+            {
+              text: "Ayarları Aç",
+              onPress: () => Linking.openSettings(),
+            },
+            { text: "İptal", style: "cancel" },
+          ]
+        );
 
-        locationData = {
-          lat: loc.coords.latitude,
-          lng: loc.coords.longitude,
-          accuracy: loc.coords.accuracy ?? undefined,
-        };
+        set({ loading: false });
+        return;
       }
+
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+
+      if (!servicesEnabled) {
+        Alert.alert(
+          "Konum Kapalı",
+          "Cihazınızda konum servisleri kapalı. Lütfen açın.",
+          [
+            {
+              text: "Konumu Aç",
+              onPress: () => {
+                if (Platform.OS === "android") {
+                  Linking.sendIntent("android.settings.LOCATION_SOURCE_SETTINGS");
+                } else {
+                  Linking.openURL("App-Prefs:root=Privacy&path=LOCATION");
+                }
+              },
+            },
+            { text: "İptal", style: "cancel" },
+          ]
+        );
+
+        set({ loading: false });
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      if (!loc?.coords) {
+        Alert.alert("Hata", "Konum alınamadı. Lütfen tekrar deneyin.");
+        set({ loading: false });
+        return;
+      }
+
+      const locationData = {
+        lat: loc.coords.latitude,
+        lng: loc.coords.longitude,
+        accuracy: loc.coords.accuracy ?? undefined,
+      };
+
+      const ref = await fsStartWork(uid, today, locationData);
+
+      set({
+        attendanceDocId: ref.id,
+        status: "çalışıyor",
+        breaks: [],
+        checkInAt: new Date(),
+        totalBreakMinutes: 0,
+        totalWorkMinutes: 0,
+        lastLoadedKey: `${uid}_${today}`,
+        loading: false,
+      });
+
     } catch (err) {
       console.log("Location error:", err);
+      Alert.alert("Hata", "Konum alınırken hata oluştu.");
+      set({ loading: false });
     }
-
-    const ref = await fsStartWork(uid, today, locationData);
-
-    set({
-      attendanceDocId: ref.id,
-      status: "çalışıyor",
-      breaks: [],
-      checkInAt: new Date(),
-      totalBreakMinutes: 0,
-      totalWorkMinutes: 0,
-      lastLoadedKey: `${uid}_${today}`,
-      loading: false,
-    });
   },
 
   endWork: async () => {
@@ -183,12 +227,81 @@ export const useHomeStore = create<HomeState>((set, get) => ({
     if (!attendanceDocId) return;
 
     set({ loading: true });
-    await fsEndWork(attendanceDocId);
-    set((state) => ({
-      status: "tamamlandı",
-      ...recalculateTotals(state),
-      loading: false,
-    }));
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        Alert.alert(
+          "Konum İzni Gerekli",
+          "Mesaiyi bitirmek için konum izni vermeniz gerekiyor.",
+          [
+            {
+              text: "Ayarları Aç",
+              onPress: () => Linking.openSettings(),
+            },
+            { text: "İptal", style: "cancel" },
+          ]
+        );
+        set({ loading: false });
+        return;
+      }
+
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+
+      if (!servicesEnabled) {
+        Alert.alert(
+          "Konum Kapalı",
+          "Mesaiyi bitirmek için konum servislerini açmalısınız.",
+          [
+            {
+              text: "Konumu Aç",
+              onPress: () => {
+                if (Platform.OS === "android") {
+                  Linking.sendIntent(
+                    "android.settings.LOCATION_SOURCE_SETTINGS"
+                  );
+                } else {
+                  Linking.openURL("App-Prefs:root=Privacy&path=LOCATION");
+                }
+              },
+            },
+            { text: "İptal", style: "cancel" },
+          ]
+        );
+        set({ loading: false });
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      if (!loc?.coords) {
+        Alert.alert("Hata", "Konum alınamadı.");
+        set({ loading: false });
+        return;
+      }
+
+      const locationData = {
+        lat: loc.coords.latitude,
+        lng: loc.coords.longitude,
+        accuracy: loc.coords.accuracy ?? undefined,
+      };
+
+      await fsEndWork(attendanceDocId, locationData);
+
+      set((state) => ({
+        status: "tamamlandı",
+        ...recalculateTotals(state),
+        loading: false,
+      }));
+
+    } catch (err) {
+      console.log("End work location error:", err);
+      Alert.alert("Hata", "Konum alınırken hata oluştu.");
+      set({ loading: false });
+    }
   },
 
   startBreak: async () => {
