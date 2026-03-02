@@ -20,6 +20,28 @@ export default function Shift() {
     return text.charAt(0).toUpperCase() + text.slice(1);
   };
 
+  function toDateAny(value: any): Date {
+    if (!value) return new Date(NaN);
+
+    if (typeof value.toDate === "function") return value.toDate();
+    if (typeof value.seconds === "number")
+      return new Date(value.seconds * 1000);
+    if (value instanceof Date) return value;
+
+    return new Date(value);
+  }
+
+  function formatTR(dateValue: any) {
+    const date = toDateAny(dateValue);
+
+    return new Intl.DateTimeFormat("tr-TR", {
+      timeZone: "Europe/Istanbul",
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    }).format(date);
+  }
+
   return (
     <View style={styles.container}>
       <PageHeader title="Vardiya" showBack={false} />
@@ -57,15 +79,7 @@ export default function Shift() {
             <View key={s.id} style={styles.card}>
               <View style={styles.row}>
                 <View>
-                  <Text style={styles.day}>
-                    {s.date?.toDate
-                      ? s.date.toDate().toLocaleDateString("tr-TR", {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                        })
-                      : ""}
-                  </Text>
+                  <Text style={styles.day}>{formatTR(s.date)}</Text>
                 </View>
 
                 <View style={styles.right}>

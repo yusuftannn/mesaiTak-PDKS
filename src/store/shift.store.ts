@@ -1,11 +1,25 @@
 import { create } from "zustand";
 import { getUserShifts, ShiftDoc } from "../services/shift.service";
 
-function toYMD(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+function toDateAny(value: any): Date {
+  if (!value) return new Date(NaN);
+
+  if (typeof value.toDate === "function") return value.toDate();
+
+  if (typeof value.seconds === "number") return new Date(value.seconds * 1000);
+
+  if (value instanceof Date) return value;
+
+  return new Date(value);
+}
+
+function ymdInTimeZone(date: Date, timeZone = "Europe/Istanbul") {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
 }
 
 type State = {
@@ -27,16 +41,18 @@ export const useShiftStore = create<State>((set) => ({
 
       const shifts = await getUserShifts(userId);
 
-      const todayYMD = toYMD(new Date());
+      const tz = "Europe/Istanbul";
+      const todayYMD = ymdInTimeZone(new Date(), tz);
 
       const todayShift =
-        shifts.find((s) => toYMD(s.date.toDate()) === todayYMD) ?? null;
+        shifts.find((s) => {
+          const d = toDateAny(s.date);
+          const shiftYMD = ymdInTimeZone(d, tz);
 
+          return shiftYMD === todayYMD;
+        }) ?? null;
 
-      set({
-        shifts,
-        todayShift,
-      });
+      set({ shifts, todayShift });
     } catch (e) {
       console.error("loadShifts error:", e);
     } finally {

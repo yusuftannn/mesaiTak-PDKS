@@ -11,6 +11,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "../../src/store/auth.store";
 import { useHomeStore } from "../../src/store/home.store";
+import { useShiftStore } from "../../src/store/shift.store";
 import AppButton from "../../src/components/AppButton";
 import { formatMinutes } from "../../src/utils/time";
 import { toDateSafe } from "../../src/utils/date";
@@ -18,6 +19,7 @@ import PageHeader from "../../src/components/PageHeader";
 
 export default function Home() {
   const user = useAuthStore((s) => s.user);
+  const { todayShift, loadShifts } = useShiftStore();
   const router = useRouter();
   const {
     loadToday,
@@ -55,6 +57,7 @@ export default function Home() {
   useEffect(() => {
     if (!user?.uid) return;
     loadToday(user.uid);
+    loadShifts(user.uid);
   }, [user?.uid]);
 
   if (loading) {
@@ -138,9 +141,12 @@ export default function Home() {
 
         {status === "boşta" && (
           <AppButton
-            title="Mesaiye Başla"
+            title={
+              todayShift ? "Mesaiye Başla" : "Bugün için vardiya tanımlı değil"
+            }
             icon={<Ionicons name="play" size={18} color="#fff" />}
             onPress={() => startWork(user!.uid)}
+            disabled={!todayShift}
           />
         )}
 

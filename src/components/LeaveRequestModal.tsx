@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AppButton from "./AppButton";
+import PageHeader from "./PageHeader";
 
 type Props = {
   visible: boolean;
@@ -70,9 +71,8 @@ export default function LeaveRequestModal({
 
   return (
     <Modal visible={visible} animationType="slide">
+      <PageHeader title="İzin Talebi Oluştur" showBack={false} />
       <View style={styles.container}>
-        <Text style={styles.title}>İzin Talebi Oluştur</Text>
-
         <Text style={styles.label}>İzin Türü</Text>
         <View style={styles.pickerWrapper}>
           <Picker selectedValue={type} onValueChange={setType}>
