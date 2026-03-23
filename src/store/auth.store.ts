@@ -10,7 +10,7 @@ export interface AuthUser {
   role: "employee" | "admin";
   status: "active" | "passive";
 
-  companyId: string | null;
+  companyId: string;
   branchId: string | null;
 
   phone: string | null;

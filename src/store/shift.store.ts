@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { getUserShifts, ShiftDoc } from "../services/shift.service";
+import { useAuthStore } from "../store/auth.store";
 
 function toDateAny(value: any): Date {
   if (!value) return new Date(NaN);
@@ -27,7 +28,7 @@ type State = {
   shifts: ShiftDoc[];
   todayShift: ShiftDoc | null;
 
-  loadShifts: (userId: string) => Promise<void>;
+  loadShifts: () => Promise<void>;
 };
 
 export const useShiftStore = create<State>((set) => ({
@@ -35,11 +36,13 @@ export const useShiftStore = create<State>((set) => ({
   shifts: [],
   todayShift: null,
 
-  loadShifts: async (userId) => {
+  loadShifts: async () => {
     try {
       set({ loading: true });
+      const user = useAuthStore.getState().user;
+      if (!user) throw new Error("USER_NOT_FOUND");
 
-      const shifts = await getUserShifts(userId);
+      const shifts = await getUserShifts(user.uid);
 
       const tz = "Europe/Istanbul";
       const todayYMD = ymdInTimeZone(new Date(), tz);

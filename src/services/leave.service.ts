@@ -12,6 +12,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { getCompanyId } from "../utils/company";
 
 export type LeaveType = "yıllık" | "hasta" | "ücretsiz" | "diğer";
 
@@ -20,6 +21,7 @@ export type LeaveStatus = "beklemede" | "onaylandı" | "reddedildi";
 export type LeaveDoc = {
   id: string;
   userId: string;
+  companyId: string;
   startDate: Timestamp;
   endDate: Timestamp;
   type: LeaveType;
@@ -40,17 +42,21 @@ export async function createLeave(
     "id" | "status" | "createdAt" | "reviewedBy" | "reviewedAt" | "rejectReason"
   >,
 ) {
+  const companyId = getCompanyId();
   return addDoc(leaveRef, {
     ...payload,
+    companyId,
     status: "beklemede",
     createdAt: serverTimestamp(),
   });
 }
 
 export async function getMyLeaves(userId: string): Promise<LeaveDoc[]> {
+  const companyId = getCompanyId();
   const q = query(
     leaveRef,
     where("userId", "==", userId),
+    where("companyId", "==", companyId),
     orderBy("createdAt", "desc"),
   );
 
@@ -63,7 +69,14 @@ export async function getMyLeaves(userId: string): Promise<LeaveDoc[]> {
 }
 
 export async function getAllLeaves(): Promise<LeaveDoc[]> {
-  const q = query(leaveRef, orderBy("createdAt", "desc"));
+  const companyId = getCompanyId();
+
+  const q = query(
+    leaveRef,
+    where("companyId", "==", companyId),
+    orderBy("createdAt", "desc"),
+  );
+
   const snap = await getDocs(q);
 
   return snap.docs.map((d) => ({
@@ -99,9 +112,12 @@ export function subscribeMyLeaves(
   userId: string,
   cb: (leaves: LeaveDoc[]) => void,
 ) {
+  const companyId = getCompanyId();
+
   const q = query(
     leaveRef,
     where("userId", "==", userId),
+    where("companyId", "==", companyId),
     orderBy("createdAt", "desc"),
   );
 

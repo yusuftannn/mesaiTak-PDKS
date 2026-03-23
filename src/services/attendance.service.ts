@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { getUserTodayShift } from "./shift.service";
+import { getCompanyId } from "../utils/company";
 
 const attendanceRef = collection(db, "attendance");
 
@@ -21,10 +22,12 @@ type BreakItem = {
 };
 
 export async function getTodayAttendance(uid: string, date: string) {
+  const companyId = getCompanyId();
   const q = query(
     attendanceRef,
     where("uid", "==", uid),
     where("date", "==", date),
+    where("companyId", "==", companyId),
   );
   const snap = await getDocs(q);
   return snap.docs[0] ?? null;
@@ -39,11 +42,14 @@ export async function startWork(
     accuracy?: number;
   } | null,
 ) {
+  const companyId = getCompanyId();
   const shift = await getUserTodayShift(uid);
 
   return addDoc(attendanceRef, {
     uid,
+    companyId,
     date,
+
     shiftStart: shift?.startTime ?? null,
     shiftEnd: shift?.endTime ?? null,
 
@@ -58,24 +64,24 @@ export async function startWork(
   });
 }
 
-  export const endWork = async (
-    docId: string,
-    locationData: {
-      lat: number;
-      lng: number;
-      accuracy?: number;
-    }
-  ) => {
-    if (!locationData?.lat || !locationData?.lng) {
-      throw new Error("Location required");
-    }
+export const endWork = async (
+  docId: string,
+  locationData: {
+    lat: number;
+    lng: number;
+    accuracy?: number;
+  },
+) => {
+  if (!locationData?.lat || !locationData?.lng) {
+    throw new Error("Location required");
+  }
 
-    return updateDoc(doc(db, "attendance", docId), {
-      status: "tamamlandı",
-      checkOutAt: serverTimestamp(),
-      checkOutLocation: locationData,
-    });
-  };
+  return updateDoc(doc(db, "attendance", docId), {
+    status: "tamamlandı",
+    checkOutAt: serverTimestamp(),
+    checkOutLocation: locationData,
+  });
+};
 
 // Mola başlat
 export async function startBreak(

@@ -10,6 +10,7 @@ import {
 } from "../services/attendance.service";
 import { diffMinutes } from "../utils/time";
 import * as Location from "expo-location";
+import { useAuthStore } from "../store/auth.store";
 
 type BreakItem = {
   type: string;
@@ -83,13 +84,15 @@ export const useHomeStore = create<HomeState>((set, get) => ({
   selectedBreakType: "yemek",
 
   loadToday: async (uid) => {
+    const user = useAuthStore.getState().user;
+    if (!user) return;
     const today = dayjs().format("YYYY-MM-DD");
     const cacheKey = `${uid}_${today}`;
     if (get().lastLoadedKey === cacheKey) return;
 
     set({ loading: true });
 
-    const snap = await getTodayAttendance(uid, today);
+    const snap = await getTodayAttendance(user.uid, today);
 
     if (!snap) {
       set({
@@ -137,6 +140,8 @@ export const useHomeStore = create<HomeState>((set, get) => ({
   },
 
   startWork: async (uid) => {
+    const user = useAuthStore.getState().user;
+    if (!user) return;
     set({ loading: true });
 
     const today = dayjs().format("YYYY-MM-DD");
@@ -154,7 +159,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
               onPress: () => Linking.openSettings(),
             },
             { text: "İptal", style: "cancel" },
-          ]
+          ],
         );
 
         set({ loading: false });
@@ -172,14 +177,16 @@ export const useHomeStore = create<HomeState>((set, get) => ({
               text: "Konumu Aç",
               onPress: () => {
                 if (Platform.OS === "android") {
-                  Linking.sendIntent("android.settings.LOCATION_SOURCE_SETTINGS");
+                  Linking.sendIntent(
+                    "android.settings.LOCATION_SOURCE_SETTINGS",
+                  );
                 } else {
                   Linking.openURL("App-Prefs:root=Privacy&path=LOCATION");
                 }
               },
             },
             { text: "İptal", style: "cancel" },
-          ]
+          ],
         );
 
         set({ loading: false });
@@ -202,7 +209,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
         accuracy: loc.coords.accuracy ?? undefined,
       };
 
-      const ref = await fsStartWork(uid, today, locationData);
+      const ref = await fsStartWork(user.uid, today, locationData);
 
       set({
         attendanceDocId: ref.id,
@@ -211,10 +218,9 @@ export const useHomeStore = create<HomeState>((set, get) => ({
         checkInAt: new Date(),
         totalBreakMinutes: 0,
         totalWorkMinutes: 0,
-        lastLoadedKey: `${uid}_${today}`,
+        lastLoadedKey: `${user.uid}_${today}`,
         loading: false,
       });
-
     } catch (err) {
       console.log("Location error:", err);
       Alert.alert("Hata", "Konum alınırken hata oluştu.");
@@ -241,7 +247,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
               onPress: () => Linking.openSettings(),
             },
             { text: "İptal", style: "cancel" },
-          ]
+          ],
         );
         set({ loading: false });
         return;
@@ -259,7 +265,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
               onPress: () => {
                 if (Platform.OS === "android") {
                   Linking.sendIntent(
-                    "android.settings.LOCATION_SOURCE_SETTINGS"
+                    "android.settings.LOCATION_SOURCE_SETTINGS",
                   );
                 } else {
                   Linking.openURL("App-Prefs:root=Privacy&path=LOCATION");
@@ -267,7 +273,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
               },
             },
             { text: "İptal", style: "cancel" },
-          ]
+          ],
         );
         set({ loading: false });
         return;
@@ -296,7 +302,6 @@ export const useHomeStore = create<HomeState>((set, get) => ({
         ...recalculateTotals(state),
         loading: false,
       }));
-
     } catch (err) {
       console.log("End work location error:", err);
       Alert.alert("Hata", "Konum alınırken hata oluştu.");

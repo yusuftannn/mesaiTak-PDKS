@@ -7,10 +7,12 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { getCompanyId } from "../utils/company";
 
 export type ShiftDoc = {
   id: string;
   userId: string;
+  companyId: string;
   date: Timestamp;
   startTime: string;
   endTime: string;
@@ -27,9 +29,11 @@ function toYMD(date: Date) {
 const shiftRef = collection(db, "shifts");
 
 export async function getUserShifts(userId: string): Promise<ShiftDoc[]> {
+  const companyId = getCompanyId();
   const q = query(
     shiftRef,
     where("userId", "==", userId),
+    where("companyId", "==", companyId),
     orderBy("date", "asc"),
   );
 
@@ -44,18 +48,31 @@ export async function getUserShifts(userId: string): Promise<ShiftDoc[]> {
 export async function getUserTodayShift(
   userId: string,
 ): Promise<ShiftDoc | null> {
-  const q = query(shiftRef, where("userId", "==", userId));
+  const companyId = getCompanyId();
+
+  const today = new Date();
+  const start = new Date(today);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(today);
+  end.setHours(23, 59, 59, 999);
+
+  const q = query(
+    shiftRef,
+    where("userId", "==", userId),
+    where("companyId", "==", companyId),
+    where("date", ">=", Timestamp.fromDate(start)),
+    where("date", "<=", Timestamp.fromDate(end)),
+  );
 
   const snap = await getDocs(q);
-  const todayYMD = toYMD(new Date());
 
-  const shift =
-    snap.docs
-      .map((d) => ({
-        id: d.id,
-        ...(d.data() as Omit<ShiftDoc, "id">),
-      }))
-      .find((s) => toYMD(s.date.toDate()) === todayYMD) ?? null;
+  if (snap.empty) return null;
 
-  return shift;
+  const d = snap.docs[0];
+
+  return {
+    id: d.id,
+    ...(d.data() as Omit<ShiftDoc, "id">),
+  };
 }

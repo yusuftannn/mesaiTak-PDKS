@@ -5,7 +5,8 @@ import {
   createLeave,
 } from "../services/leave.service";
 import { Timestamp } from "firebase/firestore";
-
+import { useAuthStore } from "../store/auth.store";
+import { getCompanyId } from "../utils/company";
 type SendLeavePayload = {
   userId: string;
   startDate: Date;
@@ -47,8 +48,13 @@ export const useLeaveStore = create<State>((set, get) => ({
   sendLeave: async (payload) => {
     set({ loading: true });
 
+    const user = useAuthStore.getState().user;
+
+    if (!user) throw new Error("USER_NOT_FOUND");
+    const companyId = getCompanyId();
     await createLeave({
-      userId: payload.userId,
+      userId: user.uid,
+      companyId: companyId,
       startDate: Timestamp.fromDate(payload.startDate),
       endDate: Timestamp.fromDate(payload.endDate),
       type: payload.type,
