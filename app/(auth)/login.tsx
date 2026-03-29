@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -71,61 +73,62 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.flex}
-    >
-      <View style={styles.container}>
-        <Text style={styles.title}>Hoş Geldin 👋</Text>
-        <Text style={styles.subtitle}>Devam etmek için giriş yap</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.flex}
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>Hoş Geldin 👋</Text>
+          <Text style={styles.subtitle}>Devam etmek için giriş yap</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="E-posta adresi"
-          placeholderTextColor="#9CA3AF"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <View style={styles.passwordContainer}>
           <TextInput
-            style={styles.passwordInput}
-            placeholder="Şifre"
+            style={styles.input}
+            placeholder="E-posta adresi"
             placeholderTextColor="#9CA3AF"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
           />
-          <TouchableOpacity
-            onPress={() => setShowPassword((s) => !s)}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons
-              name={showPassword ? "eye-off" : "eye"}
-              size={22}
-              color="#6B7280"
+
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Şifre"
+              placeholderTextColor="#9CA3AF"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
             />
+            <TouchableOpacity
+              onPress={() => setShowPassword((s) => !s)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={22}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Giriş Yap</Text>
+            )}
           </TouchableOpacity>
-        </View>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Giriş Yap</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
+          {/* <TouchableOpacity
           onPress={() => router.push("/(auth)/register")}
           style={styles.linkContainer}
         >
@@ -133,9 +136,10 @@ export default function Login() {
             Hesabın yok mu?{" "}
             <Text style={styles.linkBold}>Kayıt Ol</Text>
           </Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+        </TouchableOpacity> */}
+        </View>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 

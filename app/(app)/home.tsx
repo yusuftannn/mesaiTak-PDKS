@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Platform,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -71,189 +72,199 @@ export default function Home() {
   return (
     <View style={{ flex: 1 }}>
       <PageHeader title="MesaiTak" showBack={false} />
-
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.welcome}>Hoş geldin</Text>
-            <Text style={styles.title}>{user?.name ?? "Kullanıcı"}</Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => router.push("/(app)/profile")}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="person-circle-outline" size={44} color="#2563EB" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.statusCard}>
-          <View style={styles.statusLeft}>
-            <Ionicons
-              name={
-                status === "çalışıyor"
-                  ? "play-circle"
-                  : status === "mola"
-                    ? "pause-circle"
-                    : status === "tamamlandı"
-                      ? "checkmark-circle"
-                      : "time-outline"
-              }
-              size={36}
-              color="#2563EB"
-            />
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.container}>
+          <View style={styles.header}>
             <View>
-              <Text style={styles.label}>Durum</Text>
-              <Text style={styles.statusText}>{status}</Text>
-              {checkInAt && (
-                <Text style={styles.subText}>
-                  Giriş: {checkInAt.toLocaleTimeString("tr-TR")}
-                </Text>
-              )}
+              <Text style={styles.welcome}>Hoş geldin</Text>
+              <Text style={styles.title}>{user?.name ?? "Kullanıcı"}</Text>
             </View>
-          </View>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Bugünkü Özet</Text>
-
-          <View style={styles.row}>
-            <MaterialCommunityIcons
-              name="coffee-outline"
-              size={22}
-              color="#6B7280"
-            />
-            <Text style={styles.rowText}>
-              Toplam Mola: {formatMinutes(totalBreakMinutes)}
-            </Text>
-          </View>
-
-          <View style={styles.row}>
-            <MaterialCommunityIcons
-              name="clock-outline"
-              size={22}
-              color="#6B7280"
-            />
-            <Text style={styles.rowText}>
-              Net Çalışma: {formatMinutes(totalWorkMinutes)}
-            </Text>
-          </View>
-        </View>
-
-        {status === "boşta" && (
-          <AppButton
-            title={
-              todayShift ? "Mesaiye Başla" : "Bugün için vardiya tanımlı değil"
-            }
-            icon={<Ionicons name="play" size={18} color="#fff" />}
-            onPress={() => startWork(user!.uid)}
-            disabled={!todayShift}
-          />
-        )}
-
-        {status === "çalışıyor" && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Mola Yönetimi</Text>
-
-            <View style={styles.pickerWrapper}>
-              <Picker
-                selectedValue={selectedBreakType}
-                onValueChange={setBreakType}
-                style={styles.picker}
-              >
-                <Picker.Item label="Yemek Molası" value="yemek" />
-                <Picker.Item label="Çay / Kahve" value="cay_kahve" />
-                <Picker.Item label="Sigara" value="sigara" />
-                <Picker.Item label="Diğer" value="diger" />
-              </Picker>
-            </View>
-
-            <AppButton
-              title="Molaya Çık"
-              icon={<Ionicons name="pause" size={18} color="#2563EB" />}
-              onPress={startBreak}
-              variant="secondary"
-            />
-
-            <View style={{ marginTop: 8 }}>
-              <AppButton
-                title="Mesaiyi Bitir"
-                icon={<Ionicons name="stop" size={18} color="#fff" />}
-                onPress={endWork}
-                variant="danger"
+            <TouchableOpacity
+              onPress={() => router.push("/(app)/profile")}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons
+                name="person-circle-outline"
+                size={44}
+                color="#2563EB"
               />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.statusCard}>
+            <View style={styles.statusLeft}>
+              <Ionicons
+                name={
+                  status === "çalışıyor"
+                    ? "play-circle"
+                    : status === "mola"
+                      ? "pause-circle"
+                      : status === "tamamlandı"
+                        ? "checkmark-circle"
+                        : "time-outline"
+                }
+                size={36}
+                color="#2563EB"
+              />
+              <View>
+                <Text style={styles.label}>Durum</Text>
+                <Text style={styles.statusText}>{status}</Text>
+                {checkInAt && (
+                  <Text style={styles.subText}>
+                    Giriş: {checkInAt.toLocaleTimeString("tr-TR")}
+                  </Text>
+                )}
+              </View>
             </View>
           </View>
-        )}
 
-        {status === "mola" && (
-          <AppButton
-            title="Molayı Bitir"
-            icon={<Ionicons name="play" size={18} color="#fff" />}
-            onPress={endBreak}
-            variant="primary"
-          />
-        )}
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Bugünkü Özet</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Son Molalar</Text>
+            <View style={styles.row}>
+              <MaterialCommunityIcons
+                name="coffee-outline"
+                size={22}
+                color="#6B7280"
+              />
+              <Text style={styles.rowText}>
+                Toplam Mola: {formatMinutes(totalBreakMinutes)}
+              </Text>
+            </View>
 
-          {breaks.length === 0 && (
-            <Text style={styles.subText}>Henüz mola yok</Text>
+            <View style={styles.row}>
+              <MaterialCommunityIcons
+                name="clock-outline"
+                size={22}
+                color="#6B7280"
+              />
+              <Text style={styles.rowText}>
+                Net Çalışma: {formatMinutes(totalWorkMinutes)}
+              </Text>
+            </View>
+          </View>
+
+          {status === "boşta" && (
+            <AppButton
+              title={
+                todayShift
+                  ? "Mesaiye Başla"
+                  : "Bugün için vardiya tanımlı değil"
+              }
+              icon={<Ionicons name="play" size={18} color="#fff" />}
+              onPress={() => startWork(user!.uid)}
+              disabled={!todayShift}
+            />
           )}
 
-          {breaks
-            .slice(-3)
-            .reverse()
-            .map((b, i) => {
-              const meta = BREAK_LABELS[b.type] ?? {
-                label: b.type,
-                color: "#9CA3AF",
-              };
+          {status === "çalışıyor" && (
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Mola Yönetimi</Text>
 
-              const start = toDateSafe(b.start);
-              const end = toDateSafe(b.end);
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  selectedValue={selectedBreakType}
+                  onValueChange={setBreakType}
+                  style={styles.picker}
+                  itemStyle={{ color: "#111" }}
+                >
+                  <Picker.Item label="Yemek Molası" value="yemek" />
+                  <Picker.Item label="Çay / Kahve" value="cay_kahve" />
+                  <Picker.Item label="Sigara" value="sigara" />
+                  <Picker.Item label="Diğer" value="diger" />
+                </Picker>
+              </View>
 
-              return (
-                <View key={i} style={styles.breakCard}>
-                  <View style={styles.breakTop}>
-                    <View
-                      style={[
-                        styles.breakBadge,
-                        { backgroundColor: meta.color + "22" },
-                      ]}
-                    >
-                      <Text
-                        style={[styles.breakBadgeText, { color: meta.color }]}
+              <AppButton
+                title="Molaya Çık"
+                icon={<Ionicons name="pause" size={18} color="#2563EB" />}
+                onPress={startBreak}
+                variant="secondary"
+              />
+
+              <View style={{ marginTop: 8 }}>
+                <AppButton
+                  title="Mesaiyi Bitir"
+                  icon={<Ionicons name="stop" size={18} color="#fff" />}
+                  onPress={endWork}
+                  variant="danger"
+                />
+              </View>
+            </View>
+          )}
+
+          {status === "mola" && (
+            <AppButton
+              title="Molayı Bitir"
+              icon={<Ionicons name="play" size={18} color="#fff" />}
+              onPress={endBreak}
+              variant="primary"
+            />
+          )}
+
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Son Molalar</Text>
+
+            {breaks.length === 0 && (
+              <Text style={styles.subText}>Henüz mola yok</Text>
+            )}
+
+            {breaks
+              .slice(-3)
+              .reverse()
+              .map((b, i) => {
+                const meta = BREAK_LABELS[b.type] ?? {
+                  label: b.type,
+                  color: "#9CA3AF",
+                };
+
+                const start = toDateSafe(b.start);
+                const end = toDateSafe(b.end);
+
+                return (
+                  <View key={i} style={styles.breakCard}>
+                    <View style={styles.breakTop}>
+                      <View
+                        style={[
+                          styles.breakBadge,
+                          { backgroundColor: meta.color + "22" },
+                        ]}
                       >
-                        {meta.label}
+                        <Text
+                          style={[styles.breakBadgeText, { color: meta.color }]}
+                        >
+                          {meta.label}
+                        </Text>
+                      </View>
+
+                      <Text style={styles.breakDuration}>
+                        {getBreakDuration(b.start, b.end)}
                       </Text>
                     </View>
 
-                    <Text style={styles.breakDuration}>
-                      {getBreakDuration(b.start, b.end)}
+                    <Text style={styles.breakTime}>
+                      {start ? start.toLocaleTimeString("tr-TR") : "--"} →{" "}
+                      {end ? end.toLocaleTimeString("tr-TR") : "Devam ediyor"}
                     </Text>
                   </View>
+                );
+              })}
+          </View>
 
-                  <Text style={styles.breakTime}>
-                    {start ? start.toLocaleTimeString("tr-TR") : "--"} →{" "}
-                    {end ? end.toLocaleTimeString("tr-TR") : "Devam ediyor"}
-                  </Text>
-                </View>
-              );
-            })}
+          {status === "tamamlandı" && (
+            <Text style={styles.done}>Bugünkü mesain tamamlandı ✅</Text>
+          )}
         </View>
-
-        {status === "tamamlandı" && (
-          <Text style={styles.done}>Bugünkü mesain tamamlandı ✅</Text>
-        )}
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#F9FAFB",
     padding: 20,
   },
@@ -359,6 +370,7 @@ const styles = StyleSheet.create({
   picker: {
     height: Platform.OS === "ios" ? 140 : 50,
     color: "#111827",
+    backgroundColor: "#F9FAFB",
   },
 
   breakRow: {

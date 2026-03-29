@@ -15,7 +15,7 @@ export default function AppLayout() {
   }
 
   if (!user) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/login" />;
   }
 
   if (user.role === "admin") {

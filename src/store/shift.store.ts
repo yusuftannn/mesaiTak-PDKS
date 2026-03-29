@@ -28,7 +28,7 @@ type State = {
   shifts: ShiftDoc[];
   todayShift: ShiftDoc | null;
 
-  loadShifts: () => Promise<void>;
+  loadShifts: (uid: string) => Promise<void>;
 };
 
 export const useShiftStore = create<State>((set) => ({
@@ -36,13 +36,11 @@ export const useShiftStore = create<State>((set) => ({
   shifts: [],
   todayShift: null,
 
-  loadShifts: async () => {
+  loadShifts: async (uid: string) => {
     try {
       set({ loading: true });
-      const user = useAuthStore.getState().user;
-      if (!user) throw new Error("USER_NOT_FOUND");
 
-      const shifts = await getUserShifts(user.uid);
+      const shifts = await getUserShifts(uid);
 
       const tz = "Europe/Istanbul";
       const todayYMD = ymdInTimeZone(new Date(), tz);

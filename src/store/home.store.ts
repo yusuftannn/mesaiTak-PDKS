@@ -139,9 +139,10 @@ export const useHomeStore = create<HomeState>((set, get) => ({
     });
   },
 
-  startWork: async (uid) => {
+  startWork: async () => {
     const user = useAuthStore.getState().user;
     if (!user) return;
+    
     set({ loading: true });
 
     const today = dayjs().format("YYYY-MM-DD");

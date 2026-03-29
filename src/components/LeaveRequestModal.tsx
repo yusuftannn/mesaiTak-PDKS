@@ -1,4 +1,16 @@
-import { Modal, View, Text, StyleSheet, TextInput, Alert } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { useState, useEffect } from "react";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -71,66 +83,116 @@ export default function LeaveRequestModal({
 
   return (
     <Modal visible={visible} animationType="slide">
-      <PageHeader title="İzin Talebi Oluştur" showBack={false} />
-      <View style={styles.container}>
-        <Text style={styles.label}>İzin Türü</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker selectedValue={type} onValueChange={setType}>
-            <Picker.Item label="Yıllık İzin" value="yıllık" />
-            <Picker.Item label="Hastalık İzni" value="hasta" />
-            <Picker.Item label="Ücretsiz İzin" value="ücretsiz" />
-            <Picker.Item label="Diğer" value="diğer" />
-          </Picker>
-        </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <PageHeader title="İzin Talebi Oluştur" showBack={false} />
 
-        <Text style={styles.label}>Başlangıç Tarihi</Text>
-        <AppButton
-          title={startDate.toLocaleDateString("tr-TR")}
-          variant="secondary"
-          onPress={() => setShowStart(true)}
-        />
+          <ScrollView
+            contentContainerStyle={{ padding: 16 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text style={styles.label}>İzin Türü</Text>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={type}
+                onValueChange={(itemValue) => setType(itemValue)}
+                style={styles.picker}
+                itemStyle={{ color: "#111", backgroundColor: "#F9FAFB" }}
+              >
+                <Picker.Item label="Yıllık İzin" value="yıllık" />
+                <Picker.Item label="Hastalık İzni" value="hasta" />
+                <Picker.Item label="Ücretsiz İzin" value="ücretsiz" />
+                <Picker.Item label="Diğer" value="diğer" />
+              </Picker>
+            </View>
 
-        <Text style={styles.label}>Bitiş Tarihi</Text>
-        <AppButton
-          title={endDate.toLocaleDateString("tr-TR")}
-          variant="secondary"
-          onPress={() => setShowEnd(true)}
-        />
+            <Text style={styles.label}>Başlangıç Tarihi</Text>
 
-        <Text style={styles.label}>Açıklama</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="İzin sebebi (zorunlu)"
-          value={reason}
-          onChangeText={setReason}
-          multiline
-        />
+            <AppButton
+              title={startDate.toLocaleDateString("tr-TR")}
+              variant="secondary"
+              onPress={() => {
+                setShowStart((prev) => !prev);
+                setShowEnd(false);
+              }}
+            />
 
-        <AppButton title="Gönder" disabled={!reason.trim()} onPress={submit} />
-        <AppButton title="İptal" variant="secondary" onPress={onClose} />
+            {showStart && Platform.OS === "ios" && (
+              <View style={styles.inlinePicker}>
+                <DateTimePicker
+                  value={startDate}
+                  mode="date"
+                  display="inline"
+                  onChange={(_, d) => {
+                    if (d) setStartDate(d);
+                  }}
+                />
+              </View>
+            )}
 
-        {showStart && (
-          <DateTimePicker
-            value={startDate}
-            mode="date"
-            onChange={(_, d) => {
-              setShowStart(false);
-              if (d) setStartDate(d);
-            }}
-          />
-        )}
+            <Text style={styles.label}>Bitiş Tarihi</Text>
 
-        {showEnd && (
-          <DateTimePicker
-            value={endDate}
-            mode="date"
-            onChange={(_, d) => {
-              setShowEnd(false);
-              if (d) setEndDate(d);
-            }}
-          />
-        )}
-      </View>
+            <AppButton
+              title={endDate.toLocaleDateString("tr-TR")}
+              variant="secondary"
+              onPress={() => {
+                setShowEnd((prev) => !prev);
+                setShowStart(false);
+              }}
+            />
+
+            {showEnd && Platform.OS === "ios" && (
+              <View style={styles.inlinePicker}>
+                <DateTimePicker
+                  value={endDate}
+                  mode="date"
+                  display="inline"
+                  onChange={(_, d) => {
+                    if (d) setEndDate(d);
+                  }}
+                />
+              </View>
+            )}
+
+            <Text style={styles.label}>Açıklama</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="İzin sebebi (zorunlu)"
+              value={reason}
+              onChangeText={setReason}
+              multiline
+            />
+
+            <AppButton title="Gönder" onPress={submit} />
+            <AppButton title="İptal" variant="secondary" onPress={onClose} />
+
+            {showStart && Platform.OS === "android" && (
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                onChange={(_, d) => {
+                  setShowStart(false);
+                  if (d) setStartDate(d);
+                }}
+              />
+            )}
+
+            {showEnd && Platform.OS === "android" && (
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                onChange={(_, d) => {
+                  setShowEnd(false);
+                  if (d) setEndDate(d);
+                }}
+              />
+            )}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
@@ -154,11 +216,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
   },
+  picker: {
+    color: "#111",
+    backgroundColor: "#F9FAFB",
+  },
+
+  pickerItem: {
+    color: "#111",
+  },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: "#F9FAFB",
     borderRadius: 12,
     padding: 12,
     marginTop: 4,
     minHeight: 80,
+  },
+  inlinePicker: {
+    backgroundColor: "#111",
+    borderRadius: 12,
+    marginTop: 8,
+    padding: 8,
   },
 });
