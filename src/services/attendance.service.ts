@@ -41,6 +41,7 @@ export async function startWork(
     lng: number;
     accuracy?: number;
   } | null,
+  branchId?: string,
 ) {
   const companyId = getCompanyId();
   const shift = await getUserTodayShift(uid);
@@ -49,7 +50,7 @@ export async function startWork(
     uid,
     companyId,
     date,
-
+    branchId: branchId ?? null,
     shiftStart: shift?.startTime ?? null,
     shiftEnd: shift?.endTime ?? null,
 

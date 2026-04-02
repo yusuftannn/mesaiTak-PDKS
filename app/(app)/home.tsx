@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   Platform,
   TouchableOpacity,
   ScrollView,
+  Alert,
+  Linking,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -17,10 +19,13 @@ import AppButton from "../../src/components/AppButton";
 import { formatMinutes } from "../../src/utils/time";
 import { toDateSafe } from "../../src/utils/date";
 import PageHeader from "../../src/components/PageHeader";
+import QRScanner from "../../src/components/QRScanner";
+import * as Location from "expo-location";
 
 export default function Home() {
   const user = useAuthStore((s) => s.user);
   const { todayShift, loadShifts } = useShiftStore();
+  const [showScanner, setShowScanner] = useState(false);
   const router = useRouter();
   const {
     loadToday,
@@ -55,11 +60,73 @@ export default function Home() {
     return formatMinutes(diff);
   };
 
+  const handleOpenScanner = async () => {
+    const { status } = await Location.getForegroundPermissionsAsync();
+
+    let finalStatus = status;
+
+    if (status !== "granted") {
+      const { status: newStatus } =
+        await Location.requestForegroundPermissionsAsync();
+
+      finalStatus = newStatus;
+    }
+
+    if (finalStatus !== "granted") {
+      Alert.alert(
+        "Konum İzni Gerekli",
+        "QR ile mesai başlatmak için ayarlardan konum iznini açmalısın.",
+        [
+          {
+            text: "İptal",
+            style: "cancel",
+          },
+          {
+            text: "Ayarlara Git",
+            onPress: () => {
+              Linking.openSettings(); 
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    setShowScanner(true);
+  };
+
   useEffect(() => {
     if (!user?.uid) return;
     loadToday(user.uid);
     loadShifts(user.uid);
   }, [user?.uid]);
+
+  if (showScanner) {
+    return (
+      <QRScanner
+        onClose={() => setShowScanner(false)}
+        onSuccess={async ({ branchId, lat, lng, accuracy }) => {
+          if (!user) return;
+
+          try {
+            await startWork(user.uid, {
+              branchId,
+              location: {
+                lat,
+                lng,
+                accuracy,
+              },
+            });
+
+            Alert.alert("Başarılı", "Mesai başlatıldı ✅");
+            setShowScanner(false);
+          } catch (e) {
+            console.log("startWork error:", e);
+          }
+        }}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -148,16 +215,29 @@ export default function Home() {
           </View>
 
           {status === "boşta" && (
-            <AppButton
-              title={
-                todayShift
-                  ? "Mesaiye Başla"
-                  : "Bugün için vardiya tanımlı değil"
-              }
-              icon={<Ionicons name="play" size={18} color="#fff" />}
-              onPress={() => startWork(user!.uid)}
-              disabled={!todayShift}
-            />
+            <>
+              <AppButton
+                title={
+                  todayShift
+                    ? "Mesaiye Başla"
+                    : "Bugün için vardiya tanımlı değil"
+                }
+                icon={<Ionicons name="play" size={18} color="#fff" />}
+                onPress={() => {
+                  if (!user) return;
+                  startWork(user.uid);
+                }}
+                disabled={!todayShift}
+              />
+
+              <AppButton
+                title="QR ile Başla"
+                icon={
+                  <Ionicons name="qr-code-outline" size={18} color="#fff" />
+                }
+                onPress={handleOpenScanner}
+              />
+            </>
           )}
 
           {status === "çalışıyor" && (
