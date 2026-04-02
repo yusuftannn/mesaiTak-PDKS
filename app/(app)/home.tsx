@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -15,17 +15,25 @@ import { useRouter } from "expo-router";
 import { useAuthStore } from "../../src/store/auth.store";
 import { useHomeStore } from "../../src/store/home.store";
 import { useShiftStore } from "../../src/store/shift.store";
+import { useBranchStore } from "../../src/store/branch.store";
 import AppButton from "../../src/components/AppButton";
 import { formatMinutes } from "../../src/utils/time";
 import { toDateSafe } from "../../src/utils/date";
 import PageHeader from "../../src/components/PageHeader";
 import QRScanner from "../../src/components/QRScanner";
+
 import * as Location from "expo-location";
 
 export default function Home() {
   const user = useAuthStore((s) => s.user);
   const { todayShift, loadShifts } = useShiftStore();
+  const { branches, fetchBranches } = useBranchStore();
   const [showScanner, setShowScanner] = useState(false);
+  const isProcessingRef = useRef(false);
+  const [activeTab, setActiveTab] = useState<"kamerali" | "kamerasiz" | "qr">(
+    "kamerali",
+  );
+  const [selectedBranchId, setSelectedBranchId] = useState<string>("");
   const router = useRouter();
   const {
     loadToday,
@@ -84,7 +92,7 @@ export default function Home() {
           {
             text: "Ayarlara Git",
             onPress: () => {
-              Linking.openSettings(); 
+              Linking.openSettings();
             },
           },
         ],
@@ -97,8 +105,11 @@ export default function Home() {
 
   useEffect(() => {
     if (!user?.uid) return;
+
     loadToday(user.uid);
     loadShifts(user.uid);
+
+    fetchBranches();
   }, [user?.uid]);
 
   if (showScanner) {
@@ -107,6 +118,9 @@ export default function Home() {
         onClose={() => setShowScanner(false)}
         onSuccess={async ({ branchId, lat, lng, accuracy }) => {
           if (!user) return;
+
+          if (isProcessingRef.current) return;
+          isProcessingRef.current = true;
 
           try {
             await startWork(user.uid, {
@@ -122,6 +136,7 @@ export default function Home() {
             setShowScanner(false);
           } catch (e) {
             console.log("startWork error:", e);
+            isProcessingRef.current = false;
           }
         }}
       />
@@ -143,6 +158,55 @@ export default function Home() {
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[
+              styles.tabItem,
+              activeTab === "kamerali" && styles.tabActive,
+            ]}
+            onPress={() => setActiveTab("kamerali")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "kamerali" && styles.tabTextActive,
+              ]}
+            >
+              Kameralı
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.tabItem,
+              activeTab === "kamerasiz" && styles.tabActive,
+            ]}
+            onPress={() => setActiveTab("kamerasiz")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "kamerasiz" && styles.tabTextActive,
+              ]}
+            >
+              Kamerasız
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.tabItem, activeTab === "qr" && styles.tabActive]}
+            onPress={() => setActiveTab("qr")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "qr" && styles.tabTextActive,
+              ]}
+            >
+              Kişisel QR
+            </Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.container}>
           <View style={styles.header}>
             <View>
@@ -213,30 +277,61 @@ export default function Home() {
               </Text>
             </View>
           </View>
-
           {status === "boşta" && (
             <>
-              <AppButton
-                title={
-                  todayShift
-                    ? "Mesaiye Başla"
-                    : "Bugün için vardiya tanımlı değil"
-                }
-                icon={<Ionicons name="play" size={18} color="#fff" />}
-                onPress={() => {
-                  if (!user) return;
-                  startWork(user.uid);
-                }}
-                disabled={!todayShift}
-              />
+              {activeTab === "kamerali" && (
+                <>
+                  <AppButton
+                    title="QR ile Başla"
+                    icon={
+                      <Ionicons name="qr-code-outline" size={18} color="#fff" />
+                    }
+                    onPress={handleOpenScanner}
+                  />
+                </>
+              )}
+              {activeTab === "kamerasiz" && (
+                <View style={styles.card}>
+                  <Text style={styles.sectionTitle}>Şube Seç</Text>
 
-              <AppButton
-                title="QR ile Başla"
-                icon={
-                  <Ionicons name="qr-code-outline" size={18} color="#fff" />
-                }
-                onPress={handleOpenScanner}
-              />
+                  <View style={styles.pickerWrapper}>
+                    <Picker
+                      selectedValue={selectedBranchId}
+                      onValueChange={(val) => setSelectedBranchId(val)}
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="Şube seçiniz..." value="" />
+
+                      {branches.map((b) => (
+                        <Picker.Item key={b.id} label={b.name} value={b.id} />
+                      ))}
+                    </Picker>
+                  </View>
+
+                  <AppButton
+                    title="Mesaiyi Başlat"
+                    icon={<Ionicons name="play" size={18} color="#fff" />}
+                    onPress={() => {
+                      if (!user) return;
+
+                      if (!selectedBranchId) {
+                        Alert.alert("Hata", "Lütfen şube seçiniz");
+                        return;
+                      }
+
+                      startWork(user.uid, {
+                        branchId: selectedBranchId,
+                      });
+                    }}
+                  />
+                </View>
+              )}
+              {activeTab === "qr" && (
+                <View style={styles.card}>
+                  <Text style={styles.sectionTitle}>Kişisel QR</Text>
+                  <Text style={styles.subText}>Yakında aktif olacak 🚀</Text>
+                </View>
+              )}
             </>
           )}
 
@@ -504,5 +599,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6B7280",
     marginTop: 4,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    backgroundColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 4,
+    margin: 16,
+  },
+
+  tabItem: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10,
+  },
+
+  tabActive: {
+    backgroundColor: "#2563EB",
+  },
+
+  tabText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+
+  tabTextActive: {
+    color: "#fff",
   },
 });
