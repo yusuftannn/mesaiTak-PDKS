@@ -23,6 +23,7 @@ import PageHeader from "../../src/components/PageHeader";
 import QRScanner from "../../src/components/QRScanner";
 
 import * as Location from "expo-location";
+import PersonalQR from "../../src/components/PersonalQR";
 
 export default function Home() {
   const user = useAuthStore((s) => s.user);
@@ -299,6 +300,7 @@ export default function Home() {
                       selectedValue={selectedBranchId}
                       onValueChange={(val) => setSelectedBranchId(val)}
                       style={styles.picker}
+                      itemStyle={{ color: "#111" }}
                     >
                       <Picker.Item label="Şube seçiniz..." value="" />
 
@@ -321,6 +323,11 @@ export default function Home() {
 
                       startWork(user.uid, {
                         branchId: selectedBranchId,
+                        location: {
+                          lat: 0,
+                          lng: 0,
+                          accuracy: 0,
+                        },
                       });
                     }}
                   />
@@ -329,7 +336,8 @@ export default function Home() {
               {activeTab === "qr" && (
                 <View style={styles.card}>
                   <Text style={styles.sectionTitle}>Kişisel QR</Text>
-                  <Text style={styles.subText}>Yakında aktif olacak 🚀</Text>
+
+                  {user && <PersonalQR uid={user.uid} />}
                 </View>
               )}
             </>
