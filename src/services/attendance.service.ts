@@ -8,9 +8,11 @@ import {
   doc,
   Timestamp,
   addDoc,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { getUserTodayShift } from "./shift.service";
+import { calculateDistanceMeters } from "../utils/distance";
 import { getCompanyId } from "../utils/company";
 
 const attendanceRef = collection(db, "attendance");
@@ -21,6 +23,26 @@ type BreakItem = {
   end: Timestamp | null;
 };
 
+async function getBranch(branchId: string) {
+  const snap = await getDoc(doc(db, "branches", branchId));
+  if (!snap.exists()) return null;
+
+  return snap.data() as {
+    name?: string;
+    lat?: number;
+    lng?: number;
+    allowedDistance?: number;
+  };
+}
+async function getUser(uid: string) {
+  const snap = await getDoc(doc(db, "users", uid));
+  if (!snap.exists()) return null;
+
+  return snap.data() as {
+    branchId?: string;
+    name?: string;
+  };
+}
 export async function getTodayAttendance(uid: string, date: string) {
   const companyId = getCompanyId();
   const q = query(
@@ -44,7 +66,49 @@ export async function startWork(
   branchId?: string,
 ) {
   const companyId = getCompanyId();
+  const userData = await getUser(uid);
+
+  if (branchId && userData?.branchId && branchId !== userData.branchId) {
+    throw new Error("Bu şube için yetkiniz yok");
+  }
   const shift = await getUserTodayShift(uid);
+
+  if (location && branchId) {
+    if (location && branchId) {
+      const branch = await getBranch(branchId);
+
+      if (branch?.lat && branch?.lng) {
+        const distance = calculateDistanceMeters(
+          location.lat,
+          location.lng,
+          branch.lat,
+          branch.lng,
+        );
+
+        const allowedDistance = branch.allowedDistance ?? 200;
+
+        if (distance > allowedDistance) {
+          const severity =
+            distance > 1000 ? "high" : distance > 500 ? "medium" : "low";
+
+          await addDoc(collection(db, "suspicious_logs"), {
+            userId: uid,
+            userName: "",
+            branchId,
+            branchName: branch.name ?? "",
+            distance,
+            allowedDistance,
+            severity,
+            userLat: location.lat,
+            userLng: location.lng,
+            branchLat: branch.lat,
+            branchLng: branch.lng,
+            createdAt: serverTimestamp(),
+          });
+        }
+      }
+    }
+  }
 
   return addDoc(attendanceRef, {
     uid,

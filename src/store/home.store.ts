@@ -199,8 +199,9 @@ export const useHomeStore = create<HomeState>((set, get) => ({
       });
     } catch (err) {
       console.log("startWork error:", err);
-      Alert.alert("Hata", "Mesai başlatılamadı");
       set({ loading: false });
+
+      throw err;
     }
   },
 

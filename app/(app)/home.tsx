@@ -70,6 +70,10 @@ export default function Home() {
   };
 
   const handleOpenScanner = async () => {
+    if (!todayShift) {
+      Alert.alert("Hata", "Bugün için mesainiz bulunmuyor");
+      return;
+    }
     const { status } = await Location.getForegroundPermissionsAsync();
 
     let finalStatus = status;
@@ -123,6 +127,12 @@ export default function Home() {
           if (isProcessingRef.current) return;
           isProcessingRef.current = true;
 
+          if (!todayShift) {
+            Alert.alert("Hata", "Bugün için mesainiz bulunmuyor");
+            isProcessingRef.current = false;
+            return;
+          }
+
           try {
             await startWork(user.uid, {
               branchId,
@@ -135,8 +145,8 @@ export default function Home() {
 
             Alert.alert("Başarılı", "Mesai başlatıldı ✅");
             setShowScanner(false);
-          } catch (e) {
-            console.log("startWork error:", e);
+          } catch (e: any) {
+            Alert.alert("Hata", e?.message || "Mesai başlatılamadı");
             isProcessingRef.current = false;
           }
         }}
@@ -293,44 +303,92 @@ export default function Home() {
               )}
               {activeTab === "kamerasiz" && (
                 <View style={styles.card}>
-                  <Text style={styles.sectionTitle}>Şube Seç</Text>
+                  {(() => {
+                    const userBranches = branches.filter((b) =>
+                      user?.branchId ? user.branchId === b.id : false,
+                    );
 
-                  <View style={styles.pickerWrapper}>
-                    <Picker
-                      selectedValue={selectedBranchId}
-                      onValueChange={(val) => setSelectedBranchId(val)}
-                      style={styles.picker}
-                      itemStyle={{ color: "#111" }}
-                    >
-                      <Picker.Item label="Şube seçiniz..." value="" />
+                    const hasBranch = userBranches.length > 0;
 
-                      {branches.map((b) => (
-                        <Picker.Item key={b.id} label={b.name} value={b.id} />
-                      ))}
-                    </Picker>
-                  </View>
+                    return (
+                      <>
+                        {hasBranch ? (
+                          <Picker
+                            selectedValue={selectedBranchId}
+                            onValueChange={(val: string) =>
+                              setSelectedBranchId(val)
+                            }
+                            style={styles.picker}
+                            itemStyle={{ color: "#111" }}
+                          >
+                            <Picker.Item label="Şube seçiniz..." value="" />
+                            {userBranches.map((b) => (
+                              <Picker.Item
+                                key={b.id}
+                                label={b.name}
+                                value={b.id}
+                              />
+                            ))}
+                          </Picker>
+                        ) : (
+                          <View style={styles.emptyBranchBox}>
+                            <Ionicons
+                              name="business-outline"
+                              size={22}
+                              color="#9CA3AF"
+                            />
+                            <Text style={styles.emptyBranchText}>
+                              Herhangi bir şubeye atanmadınız.
+                            </Text>
+                            <Text style={styles.emptyBranchSubText}>
+                              Lütfen yöneticiniz ile iletişime geçin
+                            </Text>
+                          </View>
+                        )}
 
-                  <AppButton
-                    title="Mesaiyi Başlat"
-                    icon={<Ionicons name="play" size={18} color="#fff" />}
-                    onPress={() => {
-                      if (!user) return;
+                        <AppButton
+                          title="Mesaiyi Başlat"
+                          icon={<Ionicons name="play" size={18} color="#fff" />}
+                          disabled={!hasBranch || !todayShift}
+                          onPress={async () => {
+                            if (!user || !selectedBranchId) return;
 
-                      if (!selectedBranchId) {
-                        Alert.alert("Hata", "Lütfen şube seçiniz");
-                        return;
-                      }
+                            const { status } =
+                              await Location.getForegroundPermissionsAsync();
 
-                      startWork(user.uid, {
-                        branchId: selectedBranchId,
-                        location: {
-                          lat: 0,
-                          lng: 0,
-                          accuracy: 0,
-                        },
-                      });
-                    }}
-                  />
+                            let finalStatus = status;
+
+                            if (status !== "granted") {
+                              const { status: newStatus } =
+                                await Location.requestForegroundPermissionsAsync();
+                              finalStatus = newStatus;
+                            }
+
+                            if (finalStatus !== "granted") {
+                              Alert.alert(
+                                "Konum İzni Gerekli",
+                                "Mesai başlatmak için konum izni vermelisin.",
+                              );
+                              return;
+                            }
+
+                            const loc = await Location.getCurrentPositionAsync({
+                              accuracy: Location.Accuracy.High,
+                            });
+
+                            await startWork(user.uid, {
+                              branchId: selectedBranchId,
+                              location: {
+                                lat: loc.coords.latitude,
+                                lng: loc.coords.longitude,
+                                accuracy: loc.coords.accuracy ?? 0,
+                              },
+                            });
+                          }}
+                        />
+                      </>
+                    );
+                  })()}
                 </View>
               )}
               {activeTab === "qr" && (
@@ -509,6 +567,25 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6B7280",
     marginTop: 2,
+  },
+
+  emptyBranchBox: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+    gap: 6,
+  },
+
+  emptyBranchText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+  },
+
+  emptyBranchSubText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    textAlign: "center",
   },
 
   card: {
