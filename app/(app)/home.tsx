@@ -293,10 +293,11 @@ export default function Home() {
               {activeTab === "kamerali" && (
                 <>
                   <AppButton
-                    title="QR ile Başla"
+                    title={todayShift ? "QR ile Başla" : "Bugün mesain yok"}
                     icon={
                       <Ionicons name="qr-code-outline" size={18} color="#fff" />
                     }
+                    disabled={!todayShift}
                     onPress={handleOpenScanner}
                   />
                 </>
@@ -347,7 +348,9 @@ export default function Home() {
                         )}
 
                         <AppButton
-                          title="Mesaiyi Başlat"
+                          title={
+                            todayShift ? "Mesaiyi Başlat" : "Bugün mesain yok"
+                          }
                           icon={<Ionicons name="play" size={18} color="#fff" />}
                           disabled={!hasBranch || !todayShift}
                           onPress={async () => {

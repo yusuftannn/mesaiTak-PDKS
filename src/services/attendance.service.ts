@@ -41,6 +41,7 @@ async function getUser(uid: string) {
   return snap.data() as {
     branchId?: string;
     name?: string;
+    userName?: string;
   };
 }
 export async function getTodayAttendance(uid: string, date: string) {
@@ -93,7 +94,7 @@ export async function startWork(
 
           await addDoc(collection(db, "suspicious_logs"), {
             userId: uid,
-            userName: "",
+            userName: userData?.userName ?? "",
             branchId,
             branchName: branch.name ?? "",
             distance,

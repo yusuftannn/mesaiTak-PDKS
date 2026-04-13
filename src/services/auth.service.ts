@@ -9,26 +9,62 @@ import {
   doc,
   getDoc,
   serverTimestamp,
+  collection,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 import type { AuthUser } from "../store/auth.store";
 
+type UserLookup = {
+  email: string;
+};
 export async function login(
-  email: string,
-  password: string
+  identifier: string,
+  password: string,
 ): Promise<UserCredential> {
-  return signInWithEmailAndPassword(auth, email, password);
+  let emailToUse = identifier.trim();
+
+  const isEmail = emailToUse.includes("@");
+
+  if (!isEmail) {
+    const user = await findUserByUsername(emailToUse);
+
+    if (!user) {
+      throw { code: "auth/user-not-found" };
+    }
+
+    emailToUse = user.email;
+  }
+
+  return signInWithEmailAndPassword(auth, emailToUse, password);
+}
+
+export async function findUserByUsername(
+  userName: string,
+): Promise<UserLookup | null> {
+  const q = query(
+    collection(db, "users"),
+    where("userName", "==", userName.toLowerCase()),
+  );
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) return null;
+
+  const data = snap.docs[0].data();
+
+  return {
+    email: data.email as string,
+  };
 }
 
 export async function register(
   email: string,
   password: string,
-  name?: string
+  name?: string,
 ): Promise<UserCredential> {
-  const cred = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
 
   const user = cred.user;
 
@@ -52,9 +88,7 @@ export async function register(
   return cred;
 }
 
-export async function getUserProfile(
-  uid: string
-): Promise<AuthUser> {
+export async function getUserProfile(uid: string): Promise<AuthUser> {
   const snap = await getDoc(doc(db, "users", uid));
 
   if (!snap.exists()) {

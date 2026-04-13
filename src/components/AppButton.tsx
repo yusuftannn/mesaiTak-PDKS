@@ -18,12 +18,16 @@ export default function AppButton({
   icon,
   disabled = false,
 }: Props) {
-  const backgroundColor =
-    variant === "primary"
-      ? "#2563EB"
-      : variant === "danger"
-        ? "#DC2626"
-        : "#E5E7EB";
+  const getBackgroundColor = () => {
+    if (disabled) {
+      if (variant === "primary") return "#93C5FD";
+      if (variant === "danger") return "#FCA5A5";
+      return "#E5E7EB";
+
+    if (variant === "primary") return "#2563EB";
+    if (variant === "danger") return "#DC2626";
+    return "#E5E7EB";
+  };
 
   const textColor = variant === "secondary" ? "#111827" : "#FFFFFF";
 
@@ -31,11 +35,12 @@ export default function AppButton({
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      pointerEvents={disabled ? "none" : "auto"}
       style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor,
-          opacity: disabled ? 0.45 : pressed ? 0.85 : 1,
+          backgroundColor: getBackgroundColor(),
+          opacity: pressed && !disabled ? 0.85 : 1,
         },
       ]}
       accessibilityRole="button"

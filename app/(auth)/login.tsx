@@ -17,30 +17,30 @@ import { useRouter } from "expo-router";
 import { login, getUserProfile } from "../../src/services/auth.service";
 import { useAuthStore } from "../../src/store/auth.store";
 
-function mapFirebaseAuthError(err: any): string {
-  const code: string | undefined = err?.code;
+function mapFirebaseAuthError(err: unknown): string {
+  const code = (err as { code?: string })?.code;
 
   switch (code) {
     case "auth/invalid-email":
       return "Geçersiz e-posta adresi.";
     case "auth/user-not-found":
-      return "Bu e-posta ile kayıtlı kullanıcı bulunamadı.";
+      return "Kullanıcı bulunamadı.";
     case "auth/wrong-password":
     case "auth/invalid-credential":
-      return "E-posta veya şifre hatalı.";
+      return "Bilgiler hatalı.";
     case "auth/too-many-requests":
-      return "Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.";
+      return "Çok fazla deneme. Daha sonra tekrar dene.";
     case "auth/network-request-failed":
-      return "İnternet bağlantısı bulunamadı.";
+      return "İnternet bağlantısı yok.";
     case "auth/user-disabled":
-      return "Bu hesap devre dışı bırakılmış.";
+      return "Hesap devre dışı.";
     default:
-      return "Giriş başarısız. Bilgilerinizi kontrol edin.";
+      return "Giriş başarısız.";
   }
 }
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -51,8 +51,8 @@ export default function Login() {
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      setError("E-posta ve şifre zorunludur.");
+    if (!identifier || !password) {
+      setError("E-posta / kullanıcı adı ve şifre zorunludur.");
       return;
     }
 
@@ -60,12 +60,13 @@ export default function Login() {
     setError("");
 
     try {
-      const cred = await login(email.trim(), password);
+      const cred = await login(identifier, password);
+
       const profile = await getUserProfile(cred.user.uid);
 
       setUser(profile);
       router.replace("/(app)/home");
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(mapFirebaseAuthError(e));
     } finally {
       setLoading(false);
@@ -82,14 +83,14 @@ export default function Login() {
           <Text style={styles.title}>Hoş Geldin 👋</Text>
           <Text style={styles.subtitle}>Devam etmek için giriş yap</Text>
 
+          {/* 🔥 FIX */}
           <TextInput
             style={styles.input}
-            placeholder="E-posta adresi"
+            placeholder="E-posta veya kullanıcı adı"
             placeholderTextColor="#9CA3AF"
             autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
+            value={identifier}
+            onChangeText={setIdentifier}
           />
 
           <View style={styles.passwordContainer}>
@@ -101,10 +102,7 @@ export default function Login() {
               value={password}
               onChangeText={setPassword}
             />
-            <TouchableOpacity
-              onPress={() => setShowPassword((s) => !s)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
+            <TouchableOpacity onPress={() => setShowPassword((s) => !s)}>
               <Ionicons
                 name={showPassword ? "eye-off" : "eye"}
                 size={22}
@@ -119,7 +117,6 @@ export default function Login() {
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleLogin}
             disabled={loading}
-            activeOpacity={0.8}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
@@ -127,16 +124,6 @@ export default function Login() {
               <Text style={styles.buttonText}>Giriş Yap</Text>
             )}
           </TouchableOpacity>
-
-          {/* <TouchableOpacity
-          onPress={() => router.push("/(auth)/register")}
-          style={styles.linkContainer}
-        >
-          <Text style={styles.link}>
-            Hesabın yok mu?{" "}
-            <Text style={styles.linkBold}>Kayıt Ol</Text>
-          </Text>
-        </TouchableOpacity> */}
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
