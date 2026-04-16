@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "../../src/store/auth.store";
 import { useHomeStore } from "../../src/store/home.store";
 import { useShiftStore } from "../../src/store/shift.store";
@@ -31,6 +31,10 @@ export default function Home() {
   const { branches, fetchBranches } = useBranchStore();
   const [showScanner, setShowScanner] = useState(false);
   const isProcessingRef = useRef(false);
+  const { skipLate, skipEarly } = useLocalSearchParams<{
+    skipLate?: string;
+    skipEarly?: string;
+  }>();
   const [activeTab, setActiveTab] = useState<"kamerali" | "kamerasiz" | "qr">(
     "kamerali",
   );
@@ -61,7 +65,18 @@ export default function Home() {
     diger: { label: "Diğer", color: "#6366F1" },
   };
 
-  const getBreakDuration = (start: any, end: any | null) => {
+  function combineDateAndTime(date: Date, time: string): Date | null {
+    const [hour, minute] = time.split(":").map(Number);
+
+    if (isNaN(hour) || isNaN(minute)) return null;
+
+    const d = new Date(date);
+    d.setHours(hour, minute, 0, 0);
+
+    return d;
+  }
+
+  const getBreakDuration = (start: unknown, end: unknown | null) => {
     const s = toDateSafe(start);
     const e = end ? toDateSafe(end) : new Date();
     if (!s || !e) return "--";
@@ -117,6 +132,55 @@ export default function Home() {
     fetchBranches();
   }, [user?.uid]);
 
+  const checkLate = () => {
+    if (!todayShift) return false;
+
+    const now = new Date();
+    const shiftDate = toDateSafe(todayShift.date);
+
+    if (!shiftDate) return false;
+
+    const shiftStart = combineDateAndTime(shiftDate, todayShift.startTime);
+
+    if (!shiftStart) return false;
+
+    return now > shiftStart;
+  };
+
+  const checkEarlyLeave = () => {
+    if (!todayShift) return false;
+
+    const now = new Date();
+    const shiftDate = toDateSafe(todayShift.date);
+
+    if (!shiftDate) return false;
+
+    const shiftEnd = getShiftEnd(
+      shiftDate,
+      todayShift.startTime,
+      todayShift.endTime,
+    );
+
+    if (!shiftEnd) return false;
+
+    return now < shiftEnd;
+  };
+
+  function getShiftEnd(date: Date, start: string, end: string): Date | null {
+    const startDate = combineDateAndTime(date, start);
+    const endDate = combineDateAndTime(date, end);
+
+    if (!startDate || !endDate) return null;
+
+    if (endDate <= startDate) {
+      const nextDay = new Date(endDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      return nextDay;
+    }
+
+    return endDate;
+  }
+
   if (showScanner) {
     return (
       <QRScanner
@@ -133,6 +197,27 @@ export default function Home() {
             return;
           }
 
+          if (checkLate() && skipLate !== "1") {
+            Alert.alert(
+              "Geç Kaldın",
+              "Mesaiye geç giriş yaptınız. Devam edebilmek için mazeret bildirmeniz gerekiyor.",
+              [
+                {
+                  text: "Mazeret Bildir",
+                  onPress: () => {
+                    isProcessingRef.current = false;
+                    setShowScanner(false);
+                    router.replace("/(app)/excuse?type=late");
+                  },
+                },
+              ],
+              {
+                cancelable: false,
+              },
+            );
+
+            return;
+          }
           try {
             await startWork(user.uid, {
               branchId,
@@ -142,7 +227,7 @@ export default function Home() {
                 accuracy,
               },
             });
-
+            isProcessingRef.current = false;
             Alert.alert("Başarılı", "Mesai başlatıldı ✅");
             setShowScanner(false);
           } catch (e: any) {
@@ -378,15 +463,36 @@ export default function Home() {
                             const loc = await Location.getCurrentPositionAsync({
                               accuracy: Location.Accuracy.High,
                             });
+                            const doStartWork = async () => {
+                              await startWork(user.uid, {
+                                branchId: selectedBranchId,
+                                location: {
+                                  lat: loc.coords.latitude,
+                                  lng: loc.coords.longitude,
+                                  accuracy: loc.coords.accuracy ?? 0,
+                                },
+                              });
+                            };
+                            if (checkLate() && skipLate !== "1") {
+                              Alert.alert(
+                                "Geç Kaldın",
+                                "Mesaiye geç giriş yaptınız. Devam edebilmek için mazeret bildirmeniz gerekiyor.",
+                                [
+                                  {
+                                    text: "Mazeret Bildir",
+                                    onPress: () => {
+                                      router.replace("/(app)/excuse?type=late");
+                                    },
+                                  },
+                                ],
+                                {
+                                  cancelable: false,
+                                },
+                              );
 
-                            await startWork(user.uid, {
-                              branchId: selectedBranchId,
-                              location: {
-                                lat: loc.coords.latitude,
-                                lng: loc.coords.longitude,
-                                accuracy: loc.coords.accuracy ?? 0,
-                              },
-                            });
+                              return;
+                            }
+                            await doStartWork();
                           }}
                         />
                       </>
@@ -433,7 +539,29 @@ export default function Home() {
                 <AppButton
                   title="Mesaiyi Bitir"
                   icon={<Ionicons name="stop" size={18} color="#fff" />}
-                  onPress={endWork}
+                  onPress={() => {
+                    if (checkEarlyLeave() && skipEarly !== "1") {
+                      Alert.alert(
+                        "Erken Çıkış",
+                        "Mesai bitmeden çıkıyorsunuz. Devam edebilmek için mazeret bildirmeniz gerekiyor.",
+                        [
+                          {
+                            text: "Mazeret Bildir",
+                            onPress: () => {
+                              router.replace("/(app)/excuse?type=early");
+                            },
+                          },
+                        ],
+                        {
+                          cancelable: false,
+                        },
+                      );
+
+                      return;
+                    }
+
+                    endWork();
+                  }}
                   variant="danger"
                 />
               </View>

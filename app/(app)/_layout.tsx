@@ -47,6 +47,7 @@ export default function AppLayout() {
       <Tabs.Screen name="shift" options={{ title: "Vardiya" }} />
       <Tabs.Screen name="leave" options={{ title: "İzin" }} />
       <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="excuse" options={{ href: null }} />
     </Tabs>
   );
 }

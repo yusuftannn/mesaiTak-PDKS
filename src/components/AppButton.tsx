@@ -23,6 +23,7 @@ export default function AppButton({
       if (variant === "primary") return "#93C5FD";
       if (variant === "danger") return "#FCA5A5";
       return "#E5E7EB";
+    }
 
     if (variant === "primary") return "#2563EB";
     if (variant === "danger") return "#DC2626";
