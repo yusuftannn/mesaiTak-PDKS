@@ -3,7 +3,20 @@ import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function PageHeader({ title, showBack = true }) {
+/**
+ * @param {{
+ *   title: string;
+ *   showBack?: boolean;
+ *   rightIcon?: keyof typeof Ionicons.glyphMap;
+ *   onRightPress?: (() => void) | null;
+ * }} props
+ */
+export default function PageHeader({
+  title,
+  showBack = true,
+  rightIcon = null,
+  onRightPress = null,
+}) {
   const router = useRouter();
 
   return (
@@ -19,7 +32,13 @@ export default function PageHeader({ title, showBack = true }) {
 
         <Text style={styles.title}>{title}</Text>
 
-        <View style={{ width: 26 }} />
+        {rightIcon && onRightPress ? (
+          <TouchableOpacity onPress={onRightPress}>
+            <Ionicons name={rightIcon} size={26} color="#000" />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 26 }} />
+        )}
       </View>
 
       <View style={styles.divider} />

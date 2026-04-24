@@ -249,7 +249,12 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1 }}>
-      <PageHeader title="MesaiTak" showBack={false} />
+      <PageHeader
+        title="MesaiTak"
+        showBack={false}
+        rightIcon="notifications-outline"
+        onRightPress={() => router.push("/(app)/announcements")}
+      />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
