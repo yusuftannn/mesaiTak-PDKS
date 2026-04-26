@@ -74,7 +74,21 @@ export default function Shift() {
 
         {loading && <Text style={styles.subText}>Yükleniyor…</Text>}
 
+        {!loading && shifts.length === 0 && (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="calendar-clear-outline" size={48} color="#9CA3AF" />
+
+            <Text style={styles.emptyTitle}>Henüz vardiya yok</Text>
+
+            <Text style={styles.emptyDesc}>
+              Tanımlanmış vardiyan bulunmuyor. Yöneticin sana vardiya atadığında
+              burada görünecek.
+            </Text>
+          </View>
+        )}
+
         {!loading &&
+          shifts.length > 0 &&
           shifts.map((s) => (
             <View key={s.id} style={styles.card}>
               <View style={styles.row}>
@@ -120,7 +134,32 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 8,
   },
+  
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    marginTop: 10,
+  },
 
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+    marginTop: 12,
+  },
+
+  emptyDesc: {
+    fontSize: 13,
+    color: "#6B7280",
+    textAlign: "center",
+    marginTop: 6,
+    lineHeight: 18,
+  },
+  
   todayTitle: {
     fontSize: 16,
     fontWeight: "600",

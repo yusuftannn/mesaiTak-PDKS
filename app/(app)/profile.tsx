@@ -67,6 +67,11 @@ export default function Profile() {
     setEditingName(false);
   };
 
+  function display(value?: string | null) {
+    if (!value || value.trim() === "") return "Tanımlı değil";
+    return value;
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <PageHeader title="Profil" showBack />
@@ -117,20 +122,23 @@ export default function Profile() {
         </View>
 
         <View style={styles.card}>
+          <Text style={styles.label}>Kullanıcı Adı</Text>
+          <Text style={styles.value}>{user?.userName ?? "-"}</Text>
+
           <Text style={styles.label}>Rol</Text>
           <Text style={styles.value}>{user?.role ?? "-"}</Text>
 
           <Text style={styles.label}>Şirket</Text>
-          <Text style={styles.value}>{companyName ?? "Tanımlı değil"}</Text>
+          <Text style={styles.value}>{display(companyName)}</Text>
 
           <Text style={styles.label}>Şube</Text>
-          <Text style={styles.value}>{branchName ?? "Tanımlı değil"}</Text>
+          <Text style={styles.value}>{display(branchName)}</Text>
 
           <Text style={styles.label}>Telefon</Text>
-          <Text style={styles.value}>{user?.phone ?? "-"}</Text>
+          <Text style={styles.value}>{display(user?.phone)}</Text>
 
           <Text style={styles.label}>Ülke</Text>
-          <Text style={styles.value}>{user?.country ?? "-"}</Text>
+          <Text style={styles.value}>{display(user?.country)}</Text>
         </View>
 
         <View style={styles.actions}>

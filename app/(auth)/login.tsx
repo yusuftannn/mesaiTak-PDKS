@@ -80,50 +80,70 @@ export default function Login() {
         style={styles.flex}
       >
         <View style={styles.container}>
-          <Text style={styles.title}>Hoş Geldin 👋</Text>
-          <Text style={styles.subtitle}>Devam etmek için giriş yap</Text>
+          <View style={styles.bgCircle1} />
+          <View style={styles.bgCircle2} />
 
-          {/* 🔥 FIX */}
-          <TextInput
-            style={styles.input}
-            placeholder="E-posta veya kullanıcı adı"
-            placeholderTextColor="#9CA3AF"
-            autoCapitalize="none"
-            value={identifier}
-            onChangeText={setIdentifier}
-          />
+          <View style={styles.card}>
+            <View>
+              <View style={styles.logoBox}>
+                <Ionicons name="time-outline" size={28} color="#0F172A" />
+              </View>
 
-          <View style={styles.passwordContainer}>
+              <Text style={styles.title}>MesaiTak</Text>
+
+              <Text style={styles.subtitle}>
+                Hesabına giriş yap ve devam et
+              </Text>
+            </View>
+
             <TextInput
-              style={styles.passwordInput}
-              placeholder="Şifre"
-              placeholderTextColor="#9CA3AF"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
+              placeholder="E-posta veya kullanıcı adı"
+              placeholderTextColor="#94A3B8"
+              autoCapitalize="none"
+              value={identifier}
+              onChangeText={setIdentifier}
+              style={styles.input}
             />
-            <TouchableOpacity onPress={() => setShowPassword((s) => !s)}>
-              <Ionicons
-                name={showPassword ? "eye-off" : "eye"}
-                size={22}
-                color="#6B7280"
+
+            <View style={styles.passwordContainer}>
+              <TextInput
+                placeholder="Şifre"
+                placeholderTextColor="#94A3B8"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                style={styles.passwordInput}
               />
+              <TouchableOpacity onPress={() => setShowPassword((s) => !s)}>
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color="#94A3B8"
+                />
+              </TouchableOpacity>
+            </View>
+
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+
+            <TouchableOpacity
+              onPress={handleLogin}
+              disabled={loading}
+              style={[styles.button, loading && styles.buttonDisabled]}
+            >
+              {loading ? (
+                <ActivityIndicator color="#0F172A" />
+              ) : (
+                <Text style={styles.buttonText}>Giriş Yap</Text>
+              )}
             </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>
+                Tüm hakları saklıdır.{" "}
+                <Text style={styles.footerLink}>MesaiTak</Text>
+              </Text>
+            </View>
           </View>
-
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Giriş Yap</Text>
-            )}
-          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
@@ -133,81 +153,138 @@ export default function Login() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#0F172A",
   },
+
   container: {
     flex: 1,
-    paddingHorizontal: 24,
     justifyContent: "center",
+    paddingHorizontal: 24,
   },
+
+  logoBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "#22D3EE",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+
+  bgCircle1: {
+    position: "absolute",
+    top: -100,
+    left: -50,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: "#22D3EE",
+    opacity: 0.15,
+  },
+
+  bgCircle2: {
+    position: "absolute",
+    bottom: -120,
+    right: -60,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: "#3B82F6",
+    opacity: 0.15,
+  },
+
+  card: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "700",
-    color: "#111827",
+    color: "#FFFFFF",
     marginBottom: 6,
   },
+
   subtitle: {
-    fontSize: 16,
-    color: "#6B7280",
-    marginBottom: 32,
+    fontSize: 15,
+    color: "#94A3B8",
+    marginBottom: 28,
   },
+
   input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 16,
-    marginBottom: 16,
-    color: "#111827",
+    fontSize: 15,
+    color: "#fff",
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
+
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 14,
     paddingHorizontal: 16,
-    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    marginBottom: 14,
   },
+
   passwordInput: {
     flex: 1,
     paddingVertical: 14,
-    fontSize: 16,
-    color: "#111827",
+    fontSize: 15,
+    color: "#fff",
   },
+
   error: {
-    color: "#DC2626",
-    fontSize: 14,
-    marginBottom: 12,
+    color: "#F87171",
+    fontSize: 13,
+    marginBottom: 10,
   },
+
   button: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
+    backgroundColor: "#22D3EE",
+    borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 6,
+    shadowColor: "#22D3EE",
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
   },
+
   buttonDisabled: {
     opacity: 0.6,
   },
+
   buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
+    color: "#0F172A",
+    fontSize: 15,
     fontWeight: "600",
   },
-  linkContainer: {
-    marginTop: 24,
+
+  footer: {
+    marginTop: 20,
     alignItems: "center",
   },
-  link: {
-    color: "#6B7280",
-    fontSize: 15,
+
+  footerText: {
+    color: "#94A3B8",
+    fontSize: 13,
   },
-  linkBold: {
-    color: "#2563EB",
+
+  footerLink: {
+    color: "#22D3EE",
     fontWeight: "600",
   },
 });

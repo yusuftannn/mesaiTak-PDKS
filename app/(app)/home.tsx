@@ -294,7 +294,7 @@ export default function Home() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[styles.tabItem, activeTab === "qr" && styles.tabActive]}
             onPress={() => setActiveTab("qr")}
           >
@@ -306,7 +306,7 @@ export default function Home() {
             >
               Kişisel QR
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <View style={styles.container}>
           <View style={styles.header}>
@@ -505,13 +505,13 @@ export default function Home() {
                   })()}
                 </View>
               )}
-              {activeTab === "qr" && (
+              {/* {activeTab === "qr" && (
                 <View style={styles.card}>
                   <Text style={styles.sectionTitle}>Kişisel QR</Text>
 
                   {user && <PersonalQR uid={user.uid} />}
                 </View>
-              )}
+              )} */}
             </>
           )}
 
