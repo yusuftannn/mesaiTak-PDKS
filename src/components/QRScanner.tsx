@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Location from "expo-location";
@@ -17,11 +17,38 @@ export default function QRScanner({ onSuccess, onClose }: Props) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
+  const lastScanRef = useRef(0);
+  const locationRef = useRef<{
+    lat: number;
+    lng: number;
+    accuracy?: number;
+  } | null>(null);
+
   useEffect(() => {
-    requestPermission();
+    (async () => {
+      await requestPermission();
+
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") return;
+
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      locationRef.current = {
+        lat: loc.coords.latitude,
+        lng: loc.coords.longitude,
+        accuracy: loc.coords.accuracy ?? undefined,
+      };
+    })();
   }, []);
 
   const handleScan = async ({ data }: { data: string }) => {
+    const now = Date.now();
+
+    if (now - lastScanRef.current < 800) return;
+    lastScanRef.current = now;
+
     if (scanned) return;
 
     try {
@@ -32,18 +59,13 @@ export default function QRScanner({ onSuccess, onClose }: Props) {
 
       if (!branchId) throw new Error("branchId yok");
 
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") throw new Error("Konum izni yok");
-
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
+      const loc = locationRef.current;
 
       onSuccess({
         branchId,
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
-        accuracy: location.coords.accuracy ?? undefined,
+        lat: loc?.lat ?? 0,
+        lng: loc?.lng ?? 0,
+        accuracy: loc?.accuracy,
       });
     } catch (e) {
       console.log("QR parse error:", e);
@@ -70,6 +92,7 @@ export default function QRScanner({ onSuccess, onClose }: Props) {
     <View style={{ flex: 1 }}>
       <CameraView
         style={{ flex: 1 }}
+        zoom={0.2} 
         barcodeScannerSettings={{
           barcodeTypes: ["qr"],
         }}
