@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Location from "expo-location";
+import { colors } from "../core/theme";
 
 type Props = {
   onSuccess: (data: {
@@ -123,12 +124,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   text: {
-    color: "#fff",
+    color: colors.surface,
     fontSize: 16,
     marginBottom: 10,
   },
   close: {
-    color: "#fff",
+    color: colors.surface,
     fontWeight: "600",
   },
 });

@@ -16,6 +16,7 @@ import { useAdminLeavesStore } from "../../src/store/adminLeaves.store";
 import { useAuthStore } from "../../src/store/auth.store";
 import { LeaveDoc } from "../../src/services/leave.service";
 import { auth } from "../../src/services/firebase";
+import { colors } from "../../src/core/theme";
 
 const FILTERS = [
   { key: "pending", label: "Bekleyen" },
@@ -97,7 +98,7 @@ export default function AdminLeaves() {
 
       {!loading && error && (
         <View style={styles.errorBox}>
-          <Ionicons name="alert-circle-outline" size={20} color="#DC2626" />
+          <Ionicons name="alert-circle-outline" size={20} color={colors.accent} />
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity onPress={safeLoad} style={styles.retryBtn}>
             <Text style={styles.retryText}>Tekrar Dene</Text>
@@ -203,7 +204,7 @@ export default function AdminLeaves() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
 
   filters: {
@@ -216,25 +217,25 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: colors.border,
   },
   filterBtnActive: {
-    backgroundColor: "#2563EB",
+    backgroundColor: colors.primary,
   },
 
   filterText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#374151",
+    color: colors.textPrimary,
   },
   filterTextActive: {
-    color: "#fff",
+    color: colors.surface,
   },
 
   loading: {
     textAlign: "center",
     marginTop: 12,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   errorBox: {
@@ -242,9 +243,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: colors.accentSoft,
     borderWidth: 1,
-    borderColor: "#FCA5A5",
+    borderColor: colors.accentMuted,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     flex: 1,
-    color: "#991B1B",
+    color: colors.accent,
     fontSize: 13,
   },
 
@@ -260,11 +261,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: "#DC2626",
+    backgroundColor: colors.accent,
   },
 
   retryText: {
-    color: "#fff",
+    color: colors.surface,
     fontSize: 12,
     fontWeight: "600",
   },
@@ -272,11 +273,11 @@ const styles = StyleSheet.create({
   empty: {
     margin: 16,
     textAlign: "center",
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     marginHorizontal: 12,
     marginVertical: 6,
     padding: 16,
@@ -284,10 +285,10 @@ const styles = StyleSheet.create({
   },
 
   approvedCard: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: colors.successSoft,
   },
   rejectedCard: {
-    backgroundColor: "#FEF2F2",
+    backgroundColor: colors.accentSoft,
   },
 
   bold: {
@@ -297,22 +298,22 @@ const styles = StyleSheet.create({
 
   date: {
     marginTop: 4,
-    color: "#374151",
+    color: colors.textPrimary,
   },
 
   approvedText: {
     marginTop: 6,
-    color: "#059669",
+    color: colors.success,
     fontWeight: "600",
   },
   rejectedText: {
     marginTop: 6,
-    color: "#DC2626",
+    color: colors.accent,
     fontWeight: "600",
   },
   pendingText: {
     marginTop: 6,
-    color: "#2563EB",
+    color: colors.primary,
     fontWeight: "600",
   },
 });

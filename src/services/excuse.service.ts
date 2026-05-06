@@ -9,10 +9,12 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { CreateExcuseInput, Excuse, ExcuseDoc } from "../types/excuse.types";
+import { getCompanyId } from "../utils/company";
 
 const excuseRef = collection(db, "excuses");
 
 function mapExcuse(id: string, data: ExcuseDoc): Excuse {
+  const companyId = getCompanyId();
   return {
     id,
     userId: data.userId,
@@ -21,12 +23,15 @@ function mapExcuse(id: string, data: ExcuseDoc): Excuse {
     date: data.date.toDate(),
     createdAt: data.createdAt.toDate(),
     status: data.status,
+    companyId: companyId,
   };
 }
 
 export async function createExcuse(data: CreateExcuseInput) {
+  const companyId = getCompanyId();
   await addDoc(excuseRef, {
     userId: data.userId,
+    companyId,
     type: data.type,
     description: data.description,
     date: Timestamp.fromDate(new Date()),
@@ -36,7 +41,12 @@ export async function createExcuse(data: CreateExcuseInput) {
 }
 
 export async function listExcusesByUser(userId: string): Promise<Excuse[]> {
-  const q = query(excuseRef, where("userId", "==", userId));
+  const companyId = getCompanyId();
+  const q = query(
+    excuseRef,
+    where("userId", "==", userId),
+    where("companyId", "==", companyId),
+  );
 
   const snap = await getDocs(q);
 

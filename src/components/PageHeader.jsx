@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { colors } from "../core/theme";
 
 /**
  * @param {{
@@ -24,7 +25,7 @@ export default function PageHeader({
       <View style={styles.header}>
         {showBack ? (
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={26} color="#000" />
+            <Ionicons name="chevron-back" size={26} color={colors.secondary} />
           </TouchableOpacity>
         ) : (
           <View style={{ width: 26 }} />
@@ -34,7 +35,7 @@ export default function PageHeader({
 
         {rightIcon && onRightPress ? (
           <TouchableOpacity onPress={onRightPress}>
-            <Ionicons name={rightIcon} size={26} color="#000" />
+            <Ionicons name={rightIcon} size={26} color={colors.secondary} />
           </TouchableOpacity>
         ) : (
           <View style={{ width: 26 }} />
@@ -47,7 +48,7 @@ export default function PageHeader({
 }
 const styles = StyleSheet.create({
   safe: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   header: {
     height: 56,
@@ -55,15 +56,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   title: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#000",
+    color: colors.secondary,
   },
   divider: {
     height: 3,
-    backgroundColor: "#000",
+    backgroundColor: colors.secondary,
   },
 });

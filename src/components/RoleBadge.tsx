@@ -1,19 +1,20 @@
 import { View, Text, StyleSheet } from "react-native";
+import { colors } from "../core/theme";
 
 export default function RoleBadge({ role }: { role: string }) {
   const bg =
     role === "admin"
-      ? "#FEE2E2"
+      ? colors.accentSoft
       : role === "manager"
-      ? "#FEF3C7"
-      : "#DBEAFE";
+      ? colors.warningSoft
+      : colors.primarySoft;
 
   const color =
     role === "admin"
-      ? "#DC2626"
+      ? colors.accent
       : role === "manager"
-      ? "#D97706"
-      : "#2563EB";
+      ? colors.warning
+      : colors.primary;
 
   return (
     <View style={[styles.badge, { backgroundColor: bg }]}>

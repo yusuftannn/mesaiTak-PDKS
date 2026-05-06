@@ -19,6 +19,7 @@ import { useAdminShiftsStore } from "../../src/store/adminShifts.store";
 import { useAdminEmployeesStore } from "../../src/store/adminUsers.store";
 import { useAuthStore } from "../../src/store/auth.store";
 import { auth } from "../../src/services/firebase";
+import { colors } from "../../src/core/theme";
 
 export default function AdminShifts() {
   const { loadShifts, shifts, loading, error } = useAdminShiftsStore();
@@ -67,7 +68,7 @@ export default function AdminShifts() {
           title="Vardiya Ekle"
           onPress={() => setOpen(true)}
           icon={
-            <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" />
+            <Ionicons name="add-circle-outline" size={20} color={colors.surface} />
           }
         />
 
@@ -94,7 +95,7 @@ export default function AdminShifts() {
 
         {!loading && error && (
           <View style={styles.errorBox}>
-            <Ionicons name="alert-circle-outline" size={20} color="#DC2626" />
+            <Ionicons name="alert-circle-outline" size={20} color={colors.accent} />
             <Text style={styles.errorText}>{error}</Text>
 
             <TouchableOpacity onPress={safeLoad} style={styles.retryBtn}>
@@ -151,20 +152,20 @@ export default function AdminShifts() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
     padding: 12,
   },
 
   loading: {
     textAlign: "center",
     marginVertical: 12,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   empty: {
     textAlign: "center",
     marginTop: 32,
-    color: "#9CA3AF",
+    color: colors.textSecondary,
   },
 
   filterBox: {
@@ -174,20 +175,20 @@ const styles = StyleSheet.create({
 
   filterLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginBottom: 4,
   },
 
   pickerWrapper: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     overflow: "hidden",
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     padding: 14,
     borderRadius: 14,
     marginBottom: 12,
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
   },
 
   sub: {
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginTop: 4,
     fontSize: 13,
   },
@@ -207,9 +208,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: colors.accentSoft,
     borderWidth: 1,
-    borderColor: "#FCA5A5",
+    borderColor: colors.accentMuted,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     flex: 1,
-    color: "#991B1B",
+    color: colors.accent,
     fontSize: 13,
   },
 
@@ -225,11 +226,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: "#DC2626",
+    backgroundColor: colors.accent,
   },
 
   retryText: {
-    color: "#fff",
+    color: colors.surface,
     fontSize: 12,
     fontWeight: "600",
   },

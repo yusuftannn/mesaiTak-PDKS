@@ -13,6 +13,7 @@ import { useAuthStore } from "../../src/store/auth.store";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../src/services/firebase";
+import { colors } from "../../src/core/theme";
 
 export default function AdminEmployees() {
   const { loadEmployees, employees, loading, error } = useAdminEmployeesStore();
@@ -44,7 +45,7 @@ export default function AdminEmployees() {
 
       {!loading && error && (
         <View style={styles.errorBox}>
-          <Ionicons name="alert-circle-outline" size={20} color="#DC2626" />
+          <Ionicons name="alert-circle-outline" size={20} color={colors.accent} />
           <Text style={styles.errorText}>{error}</Text>
 
           <TouchableOpacity onPress={safeLoad} style={styles.retryBtn}>
@@ -77,28 +78,28 @@ export default function AdminEmployees() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
 
   loading: {
     textAlign: "center",
     marginTop: 12,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   empty: {
     textAlign: "center",
     marginTop: 24,
-    color: "#9CA3AF",
+    color: colors.textSecondary,
   },
   errorBox: {
     marginHorizontal: 16,
     marginTop: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: colors.accentSoft,
     borderWidth: 1,
-    borderColor: "#FCA5A5",
+    borderColor: colors.accentMuted,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     flex: 1,
-    color: "#991B1B",
+    color: colors.accent,
     fontSize: 13,
   },
 
@@ -114,11 +115,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: "#DC2626",
+    backgroundColor: colors.accent,
   },
 
   retryText: {
-    color: "#fff",
+    color: colors.surface,
     fontSize: 12,
     fontWeight: "600",
   },

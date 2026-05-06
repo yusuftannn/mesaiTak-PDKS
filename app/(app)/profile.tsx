@@ -8,6 +8,7 @@ import { useAuthStore } from "../../src/store/auth.store";
 import AppButton from "../../src/components/AppButton";
 import { auth, db } from "../../src/services/firebase";
 import PageHeader from "../../src/components/PageHeader";
+import { colors } from "../../src/core/theme";
 
 export default function Profile() {
   const user = useAuthStore((s) => s.user);
@@ -77,7 +78,7 @@ export default function Profile() {
       <PageHeader title="Profil" showBack />
       <View style={styles.container}>
         <View style={styles.header}>
-          <Ionicons name="person-circle" size={88} color="#2563EB" />
+          <Ionicons name="person-circle" size={88} color={colors.primary} />
 
           {editingName ? (
             <View style={styles.inlineRow}>
@@ -91,14 +92,14 @@ export default function Profile() {
               <Ionicons
                 name="checkmark"
                 size={22}
-                color="#16A34A"
+                color={colors.success}
                 onPress={saveName}
               />
 
               <Ionicons
                 name="close"
                 size={22}
-                color="#DC2626"
+                color={colors.accent}
                 onPress={() => {
                   setName(user?.name ?? "");
                   setEditingName(false);
@@ -112,7 +113,7 @@ export default function Profile() {
               <Feather
                 name="edit"
                 size={16}
-                color="#6B7280"
+                color={colors.textSecondary}
                 onPress={() => setEditingName(true)}
               />
             </View>
@@ -156,7 +157,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
     padding: 20,
   },
   header: {
@@ -166,27 +167,27 @@ const styles = StyleSheet.create({
   email: {
     marginTop: 4,
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
-    shadowColor: "#000",
+    shadowColor: colors.secondary,
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
   },
   label: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginTop: 12,
   },
   value: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.textPrimary,
   },
   inlineRow: {
     flexDirection: "row",
@@ -196,12 +197,12 @@ const styles = StyleSheet.create({
   },
   inlineInput: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
     minWidth: 160,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
   },
   actions: {
     marginTop: "auto",

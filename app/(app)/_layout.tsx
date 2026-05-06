@@ -2,6 +2,7 @@ import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../../src/store/auth.store";
 import { ActivityIndicator, View } from "react-native";
+import { colors } from "../../src/core/theme";
 
 export default function AppLayout() {
   const { user, initializing } = useAuthStore();
@@ -26,8 +27,8 @@ export default function AppLayout() {
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: "#2563EB",
-        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarIcon: ({ color, focused }) => {
           let iconName: keyof typeof Ionicons.glyphMap = "ellipse";
           if (route.name === "home")

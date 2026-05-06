@@ -2,6 +2,7 @@ import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, View } from "react-native";
 import { useAuthStore } from "../../src/store/auth.store";
+import { colors } from "../../src/core/theme";
 
 export default function AdminLayout() {
   const { user, initializing } = useAuthStore();
@@ -26,10 +27,10 @@ export default function AdminLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#DC2626",
-        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: colors.surface,
           height: 64,
         },
         tabBarLabelStyle: {

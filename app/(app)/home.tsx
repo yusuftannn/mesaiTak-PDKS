@@ -24,6 +24,7 @@ import QRScanner from "../../src/components/QRScanner";
 
 import * as Location from "expo-location";
 import PersonalQR from "../../src/components/PersonalQR";
+import { colors } from "../../src/core/theme";
 
 export default function Home() {
   const user = useAuthStore((s) => s.user);
@@ -59,10 +60,10 @@ export default function Home() {
   } = useHomeStore();
 
   const BREAK_LABELS: Record<string, { label: string; color: string }> = {
-    yemek: { label: "Yemek Molası", color: "#F59E0B" },
-    cay_kahve: { label: "Çay / Kahve", color: "#10B981" },
-    sigara: { label: "Sigara", color: "#6B7280" },
-    diger: { label: "Diğer", color: "#6366F1" },
+    yemek: { label: "Yemek Molası", color: colors.warning },
+    cay_kahve: { label: "Çay / Kahve", color: colors.success },
+    sigara: { label: "Sigara", color: colors.textSecondary },
+    diger: { label: "Diğer", color: colors.primaryDark },
   };
 
   function combineDateAndTime(date: Date, time: string): Date | null {
@@ -321,7 +322,7 @@ export default function Home() {
               <Ionicons
                 name="person-circle-outline"
                 size={44}
-                color="#2563EB"
+                color={colors.primary}
               />
             </TouchableOpacity>
           </View>
@@ -339,7 +340,7 @@ export default function Home() {
                         : "time-outline"
                 }
                 size={36}
-                color="#2563EB"
+                color={colors.primary}
               />
               <View>
                 <Text style={styles.label}>Durum</Text>
@@ -360,7 +361,7 @@ export default function Home() {
               <MaterialCommunityIcons
                 name="coffee-outline"
                 size={22}
-                color="#6B7280"
+                color={colors.textSecondary}
               />
               <Text style={styles.rowText}>
                 Toplam Mola: {formatMinutes(totalBreakMinutes)}
@@ -371,7 +372,7 @@ export default function Home() {
               <MaterialCommunityIcons
                 name="clock-outline"
                 size={22}
-                color="#6B7280"
+                color={colors.textSecondary}
               />
               <Text style={styles.rowText}>
                 Net Çalışma: {formatMinutes(totalWorkMinutes)}
@@ -385,7 +386,7 @@ export default function Home() {
                   <AppButton
                     title={todayShift ? "QR ile Başla" : "Bugün mesain yok"}
                     icon={
-                      <Ionicons name="qr-code-outline" size={18} color="#fff" />
+                      <Ionicons name="qr-code-outline" size={18} color={colors.surface} />
                     }
                     disabled={!todayShift}
                     onPress={handleOpenScanner}
@@ -410,7 +411,7 @@ export default function Home() {
                               setSelectedBranchId(val)
                             }
                             style={styles.picker}
-                            itemStyle={{ color: "#111" }}
+                            itemStyle={{ color: colors.textPrimary }}
                           >
                             <Picker.Item label="Şube seçiniz..." value="" />
                             {userBranches.map((b) => (
@@ -426,7 +427,7 @@ export default function Home() {
                             <Ionicons
                               name="business-outline"
                               size={22}
-                              color="#9CA3AF"
+                              color={colors.textSecondary}
                             />
                             <Text style={styles.emptyBranchText}>
                               Herhangi bir şubeye atanmadınız.
@@ -441,7 +442,7 @@ export default function Home() {
                           title={
                             todayShift ? "Mesaiyi Başlat" : "Bugün mesain yok"
                           }
-                          icon={<Ionicons name="play" size={18} color="#fff" />}
+                          icon={<Ionicons name="play" size={18} color={colors.surface} />}
                           disabled={!hasBranch || !todayShift}
                           onPress={async () => {
                             if (!user || !selectedBranchId) return;
@@ -524,7 +525,7 @@ export default function Home() {
                   selectedValue={selectedBreakType}
                   onValueChange={setBreakType}
                   style={styles.picker}
-                  itemStyle={{ color: "#111" }}
+                  itemStyle={{ color: colors.textPrimary }}
                 >
                   <Picker.Item label="Yemek Molası" value="yemek" />
                   <Picker.Item label="Çay / Kahve" value="cay_kahve" />
@@ -535,7 +536,7 @@ export default function Home() {
 
               <AppButton
                 title="Molaya Çık"
-                icon={<Ionicons name="pause" size={18} color="#2563EB" />}
+                icon={<Ionicons name="pause" size={18} color={colors.primary} />}
                 onPress={startBreak}
                 variant="secondary"
               />
@@ -543,7 +544,7 @@ export default function Home() {
               <View style={{ marginTop: 8 }}>
                 <AppButton
                   title="Mesaiyi Bitir"
-                  icon={<Ionicons name="stop" size={18} color="#fff" />}
+                  icon={<Ionicons name="stop" size={18} color={colors.surface} />}
                   onPress={() => {
                     if (checkEarlyLeave() && skipEarly !== "1") {
                       Alert.alert(
@@ -576,7 +577,7 @@ export default function Home() {
           {status === "mola" && (
             <AppButton
               title="Molayı Bitir"
-              icon={<Ionicons name="play" size={18} color="#fff" />}
+              icon={<Ionicons name="play" size={18} color={colors.surface} />}
               onPress={endBreak}
               variant="primary"
             />
@@ -595,7 +596,7 @@ export default function Home() {
               .map((b, i) => {
                 const meta = BREAK_LABELS[b.type] ?? {
                   label: b.type,
-                  color: "#9CA3AF",
+                  color: colors.textSecondary,
                 };
 
                 const start = toDateSafe(b.start);
@@ -642,7 +643,7 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
     padding: 20,
   },
 
@@ -653,7 +654,7 @@ const styles = StyleSheet.create({
   },
 
   loading: {
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   header: {
@@ -665,17 +666,17 @@ const styles = StyleSheet.create({
 
   welcome: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   title: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#111827",
+    color: colors.textPrimary,
   },
 
   statusCard: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: colors.primarySoft,
     padding: 16,
     borderRadius: 16,
     marginBottom: 16,
@@ -689,19 +690,19 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   statusText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#1E3A8A",
+    color: colors.primaryDark,
     textTransform: "capitalize",
   },
 
   subText: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginTop: 2,
   },
 
@@ -715,21 +716,21 @@ const styles = StyleSheet.create({
   emptyBranchText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: colors.textPrimary,
   },
 
   emptyBranchSubText: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: colors.textSecondary,
     textAlign: "center",
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     padding: 16,
     borderRadius: 16,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: colors.secondary,
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
@@ -738,7 +739,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.textPrimary,
     marginBottom: 12,
   },
 
@@ -751,22 +752,22 @@ const styles = StyleSheet.create({
 
   rowText: {
     fontSize: 14,
-    color: "#374151",
+    color: colors.textPrimary,
   },
 
   pickerWrapper: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     borderRadius: 12,
     marginBottom: Platform.OS === "ios" ? 12 : 16,
     overflow: "hidden",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
 
   picker: {
     height: Platform.OS === "ios" ? 140 : 50,
-    color: "#111827",
-    backgroundColor: "#F9FAFB",
+    color: colors.textPrimary,
+    backgroundColor: colors.background,
   },
 
   breakRow: {
@@ -778,19 +779,19 @@ const styles = StyleSheet.create({
 
   breakItem: {
     fontSize: 14,
-    color: "#374151",
+    color: colors.textPrimary,
   },
 
   done: {
     marginTop: 16,
-    color: "#16A34A",
+    color: colors.success,
     fontWeight: "600",
     textAlign: "center",
   },
   breakCard: {
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: colors.border,
   },
 
   breakTop: {
@@ -813,17 +814,17 @@ const styles = StyleSheet.create({
   breakDuration: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.textPrimary,
   },
 
   breakTime: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginTop: 4,
   },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: "#E5E7EB",
+    backgroundColor: colors.border,
     borderRadius: 12,
     padding: 4,
     margin: 16,
@@ -837,16 +838,16 @@ const styles = StyleSheet.create({
   },
 
   tabActive: {
-    backgroundColor: "#2563EB",
+    backgroundColor: colors.primary,
   },
 
   tabText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   tabTextActive: {
-    color: "#fff",
+    color: colors.surface,
   },
 });

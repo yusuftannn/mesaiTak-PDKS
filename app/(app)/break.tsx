@@ -5,6 +5,7 @@ import PageHeader from "../../src/components/PageHeader";
 import { useHomeStore } from "../../src/store/home.store";
 import { toDateSafe } from "../../src/utils/date";
 import { formatMinutes } from "../../src/utils/time";
+import { colors } from "../../src/core/theme";
 
 function calcBreakMinutes(start: any, end: any) {
   const s = toDateSafe(start);
@@ -40,7 +41,7 @@ export default function Break() {
       >
         {breaks.length === 0 && (
           <View style={styles.empty}>
-            <Ionicons name="cafe-outline" size={48} color="#9CA3AF" />
+            <Ionicons name="cafe-outline" size={48} color={colors.textSecondary} />
             <Text style={styles.emptyText}>Henüz mola kaydı yok</Text>
           </View>
         )}
@@ -87,7 +88,7 @@ export default function Break() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
 
   content: {
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#111827",
+    color: colors.textPrimary,
     marginBottom: 16,
   },
 
@@ -109,16 +110,16 @@ const styles = StyleSheet.create({
 
   emptyText: {
     marginTop: 12,
-    color: "#6B7280",
+    color: colors.textSecondary,
     fontSize: 14,
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: colors.secondary,
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
@@ -126,8 +127,8 @@ const styles = StyleSheet.create({
 
   activeCard: {
     borderWidth: 1,
-    borderColor: "#2563EB",
-    backgroundColor: "#EFF6FF",
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
   },
 
   row: {
@@ -139,18 +140,18 @@ const styles = StyleSheet.create({
   type: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.textPrimary,
   },
 
   badge: {
-    backgroundColor: "#2563EB",
+    backgroundColor: colors.primary,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
 
   badgeText: {
-    color: "#FFFFFF",
+    color: colors.surface,
     fontSize: 12,
     fontWeight: "600",
   },
@@ -158,12 +159,12 @@ const styles = StyleSheet.create({
   time: {
     marginTop: 8,
     fontSize: 14,
-    color: "#374151",
+    color: colors.textPrimary,
   },
 
   duration: {
     marginTop: 4,
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 });

@@ -20,6 +20,7 @@ import {
   Branch,
   getBranchesByCompany,
 } from "../../../src/services/branch.service";
+import { colors } from "../../../src/core/theme";
 
 export default function EmployeeDetail() {
   const { uid } = useLocalSearchParams<{ uid: string }>();
@@ -231,7 +232,7 @@ function Field({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
 
   center: {
@@ -243,7 +244,7 @@ const styles = StyleSheet.create({
   card: {
     margin: 16,
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     alignItems: "center",
   },
@@ -251,21 +252,21 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#111827",
+    color: colors.textPrimary,
   },
 
   email: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginTop: 4,
   },
   label: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
   badge: {
     marginTop: 12,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: colors.border,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -289,7 +290,7 @@ const styles = StyleSheet.create({
   saving: {
     marginTop: 8,
     textAlign: "center",
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   field: {
@@ -302,29 +303,29 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
   },
 
   row: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
   },
 
   empty: {
-    color: "#9CA3AF",
+    color: colors.textSecondary,
     fontSize: 13,
     marginBottom: 8,
   },
 
   loading: {
     textAlign: "center",
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginTop: 12,
   },
 });

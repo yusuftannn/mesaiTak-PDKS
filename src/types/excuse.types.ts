@@ -7,6 +7,7 @@ export type ExcuseStatus = "pending" | "approved" | "rejected";
 export interface Excuse {
   id: string;
   userId: string;
+  companyId: string;
   type: ExcuseType;
   description: string;
   date: Date;

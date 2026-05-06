@@ -1,3 +1,4 @@
+import { colors } from "../../src/core/theme";
 "use client";
 
 import { useState, useEffect } from "react";
@@ -81,17 +82,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 12,
-    color: "#111827",
+    color: colors.textPrimary,
   },
 
   input: {
     minHeight: 120,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     textAlignVertical: "top",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
 });

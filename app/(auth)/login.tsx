@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 
 import { login, getUserProfile } from "../../src/services/auth.service";
 import { useAuthStore } from "../../src/store/auth.store";
+import { colors } from "../../src/core/theme";
 
 function mapFirebaseAuthError(err: unknown): string {
   const code = (err as { code?: string })?.code;
@@ -86,7 +87,7 @@ export default function Login() {
           <View style={styles.card}>
             <View>
               <View style={styles.logoBox}>
-                <Ionicons name="time-outline" size={28} color="#0F172A" />
+                <Ionicons name="time-outline" size={28} color={colors.secondary} />
               </View>
 
               <Text style={styles.title}>MesaiTak</Text>
@@ -98,7 +99,7 @@ export default function Login() {
 
             <TextInput
               placeholder="E-posta veya kullanıcı adı"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={colors.textSecondary}
               autoCapitalize="none"
               value={identifier}
               onChangeText={setIdentifier}
@@ -108,7 +109,7 @@ export default function Login() {
             <View style={styles.passwordContainer}>
               <TextInput
                 placeholder="Şifre"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={colors.textSecondary}
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
@@ -118,7 +119,7 @@ export default function Login() {
                 <Ionicons
                   name={showPassword ? "eye-off" : "eye"}
                   size={20}
-                  color="#94A3B8"
+                  color={colors.textSecondary}
                 />
               </TouchableOpacity>
             </View>
@@ -131,7 +132,7 @@ export default function Login() {
               style={[styles.button, loading && styles.buttonDisabled]}
             >
               {loading ? (
-                <ActivityIndicator color="#0F172A" />
+                <ActivityIndicator color={colors.secondary} />
               ) : (
                 <Text style={styles.buttonText}>Giriş Yap</Text>
               )}
@@ -153,7 +154,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: "#0F172A",
+    backgroundColor: colors.secondary,
   },
 
   container: {
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 16,
-    backgroundColor: "#22D3EE",
+    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: "#22D3EE",
+    backgroundColor: colors.primary,
     opacity: 0.15,
   },
 
@@ -190,51 +191,51 @@ const styles = StyleSheet.create({
     width: 280,
     height: 280,
     borderRadius: 140,
-    backgroundColor: "#3B82F6",
+    backgroundColor: colors.primaryDark,
     opacity: 0.15,
   },
 
   card: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: colors.secondary + "0D",
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: colors.surface + "14",
   },
 
   title: {
     fontSize: 30,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: colors.surface,
     marginBottom: 6,
   },
 
   subtitle: {
     fontSize: 15,
-    color: "#94A3B8",
+    color: colors.textSecondary,
     marginBottom: 28,
   },
 
   input: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: colors.surface + "14",
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
-    color: "#fff",
+    color: colors.surface,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: colors.surface + "1A",
   },
 
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: colors.surface + "14",
     borderRadius: 14,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: colors.surface + "1A",
     marginBottom: 14,
   },
 
@@ -242,22 +243,22 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     fontSize: 15,
-    color: "#fff",
+    color: colors.surface,
   },
 
   error: {
-    color: "#F87171",
+    color: colors.accent,
     fontSize: 13,
     marginBottom: 10,
   },
 
   button: {
-    backgroundColor: "#22D3EE",
+    backgroundColor: colors.primary,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 6,
-    shadowColor: "#22D3EE",
+    shadowColor: colors.primary,
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 6,
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "#0F172A",
+    color: colors.secondary,
     fontSize: 15,
     fontWeight: "600",
   },
@@ -279,12 +280,12 @@ const styles = StyleSheet.create({
   },
 
   footerText: {
-    color: "#94A3B8",
+    color: colors.textSecondary,
     fontSize: 13,
   },
 
   footerLink: {
-    color: "#22D3EE",
+    color: colors.primary,
     fontWeight: "600",
   },
 });

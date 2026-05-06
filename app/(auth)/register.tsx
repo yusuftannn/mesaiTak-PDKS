@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import { register } from "../../src/services/auth.service";
+import { colors } from "../../src/core/theme";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -73,7 +74,7 @@ export default function Register() {
         <TextInput
           style={styles.input}
           placeholder="Ad Soyad"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.textSecondary}
           value={name}
           onChangeText={setName}
         />
@@ -81,7 +82,7 @@ export default function Register() {
         <TextInput
           style={styles.input}
           placeholder="E-posta adresi"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.textSecondary}
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
@@ -92,7 +93,7 @@ export default function Register() {
           <TextInput
             style={styles.passwordInput}
             placeholder="Şifre"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textSecondary}
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
@@ -101,7 +102,7 @@ export default function Register() {
             <Ionicons
               name={showPassword ? "eye-off" : "eye"}
               size={22}
-              color="#6B7280"
+              color={colors.textSecondary}
             />
           </TouchableOpacity>
         </View>
@@ -110,7 +111,7 @@ export default function Register() {
           <TextInput
             style={styles.passwordInput}
             placeholder="Şifre Tekrar"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textSecondary}
             secureTextEntry={!showPassword}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -126,7 +127,7 @@ export default function Register() {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.surface} />
           ) : (
             <Text style={styles.buttonText}>Kayıt Ol</Text>
           )}
@@ -149,7 +150,7 @@ export default function Register() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
@@ -159,31 +160,31 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#111827",
+    color: colors.textPrimary,
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 16,
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginBottom: 32,
   },
   input: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     marginBottom: 16,
-    color: "#111827",
+    color: colors.textPrimary,
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
@@ -192,20 +193,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#111827",
+    color: colors.textPrimary,
   },
   error: {
-    color: "#DC2626",
+    color: colors.accent,
     fontSize: 14,
     marginBottom: 12,
   },
   success: {
-    color: "#16A34A",
+    color: colors.success,
     fontSize: 14,
     marginBottom: 12,
   },
   button: {
-    backgroundColor: "#2563EB",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: "#FFFFFF",
+    color: colors.surface,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -224,11 +225,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   link: {
-    color: "#6B7280",
+    color: colors.textSecondary,
     fontSize: 15,
   },
   linkBold: {
-    color: "#2563EB",
+    color: colors.primary,
     fontWeight: "600",
   },
 });

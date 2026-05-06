@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import PageHeader from "../../src/components/PageHeader";
 import { useAuthStore } from "../../src/store/auth.store";
 import { useShiftStore } from "../../src/store/shift.store";
+import { colors } from "../../src/core/theme";
 
 export default function Shift() {
   const user = useAuthStore((s) => s.user);
@@ -49,7 +50,7 @@ export default function Shift() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.todayCard}>
           <View style={styles.todayRow}>
-            <Ionicons name="calendar-outline" size={24} color="#2563EB" />
+            <Ionicons name="calendar-outline" size={24} color={colors.primary} />
             <Text style={styles.todayTitle}>Bugünkü Vardiya</Text>
           </View>
 
@@ -76,7 +77,7 @@ export default function Shift() {
 
         {!loading && shifts.length === 0 && (
           <View style={styles.emptyContainer}>
-            <Ionicons name="calendar-clear-outline" size={48} color="#9CA3AF" />
+            <Ionicons name="calendar-clear-outline" size={48} color={colors.textSecondary} />
 
             <Text style={styles.emptyTitle}>Henüz vardiya yok</Text>
 
@@ -113,7 +114,7 @@ export default function Shift() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
 
   content: {
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
   },
 
   todayCard: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: colors.primarySoft,
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 40,
     paddingHorizontal: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     marginTop: 10,
   },
@@ -148,13 +149,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.textPrimary,
     marginTop: 12,
   },
 
   emptyDesc: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
     textAlign: "center",
     marginTop: 6,
     lineHeight: 18,
@@ -163,52 +164,52 @@ const styles = StyleSheet.create({
   todayTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1E3A8A",
+    color: colors.primaryDark,
   },
 
   todayTime: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#111827",
+    color: colors.textPrimary,
     marginBottom: 8,
   },
 
   badge: {
     alignSelf: "flex-start",
-    backgroundColor: "#2563EB",
+    backgroundColor: colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
 
   badgeText: {
-    color: "#FFFFFF",
+    color: colors.surface,
     fontSize: 12,
     fontWeight: "600",
     textTransform: "capitalize",
   },
   subText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginBottom: 12,
   },
   emptyText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
   sectionTitle: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.textPrimary,
     marginBottom: 12,
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: colors.secondary,
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
@@ -223,12 +224,12 @@ const styles = StyleSheet.create({
   day: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.textPrimary,
   },
 
   date: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   right: {
@@ -238,12 +239,12 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.textPrimary,
   },
 
   type: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
     textTransform: "capitalize",
   },
 });

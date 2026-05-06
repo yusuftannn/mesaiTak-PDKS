@@ -6,6 +6,7 @@ import { useAdminDashboardStore } from "../../src/store/adminDashboard.store";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../../src/store/auth.store";
 import { auth } from "../../src/services/firebase";
+import { colors } from "../../src/core/theme";
 function StatCard({
   title,
   value,
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
       <PageHeader title="Admin Dashboard" showBack={false} />
       <View style={styles.header}>
         <TouchableOpacity onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={24} color="#DC2626" />
+          <Ionicons name="log-out-outline" size={24} color={colors.accent} />
         </TouchableOpacity>
       </View>
 
@@ -82,33 +83,33 @@ export default function AdminDashboard() {
           title="Toplam Çalışan"
           value={totalEmployees}
           icon="people-outline"
-          color="#2563EB"
+          color={colors.primary}
         />
 
         <StatCard
           title="Aktif Çalışan"
           value={activeCount}
           icon="pulse-outline"
-          color="#16A34A"
+          color={colors.success}
         />
 
         <StatCard
           title="Çalışıyor"
           value={workingCount}
           icon="play-circle-outline"
-          color="#0EA5E9"
+          color={colors.primary}
         />
 
         <StatCard
           title="Molada"
           value={breakCount}
           icon="cafe-outline"
-          color="#F59E0B"
+          color={colors.warning}
         />
       </View>
       {!loading && error && (
         <View style={styles.errorBox}>
-          <Ionicons name="alert-circle-outline" size={20} color="#DC2626" />
+          <Ionicons name="alert-circle-outline" size={20} color={colors.accent} />
           <Text style={styles.errorText}>{error}</Text>
 
           <TouchableOpacity onPress={safeLoad} style={styles.retryBtn}>
@@ -125,7 +126,7 @@ export default function AdminDashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
 
   grid: {
@@ -142,14 +143,14 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     borderLeftWidth: 4,
-    shadowColor: "#000",
+    shadowColor: colors.secondary,
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
@@ -158,17 +159,17 @@ const styles = StyleSheet.create({
   cardValue: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#111827",
+    color: colors.textPrimary,
   },
 
   cardTitle: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
 
   loading: {
     textAlign: "center",
-    color: "#6B7280",
+    color: colors.textSecondary,
     marginTop: 12,
   },
   errorBox: {
@@ -176,9 +177,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: colors.accentSoft,
     borderWidth: 1,
-    borderColor: "#FCA5A5",
+    borderColor: colors.accentMuted,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     flex: 1,
-    color: "#991B1B",
+    color: colors.accent,
     fontSize: 13,
   },
 
@@ -194,11 +195,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: "#DC2626",
+    backgroundColor: colors.accent,
   },
 
   retryText: {
-    color: "#fff",
+    color: colors.surface,
     fontSize: 12,
     fontWeight: "600",
   },

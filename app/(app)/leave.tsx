@@ -8,6 +8,7 @@ import LeaveRequestModal from "../../src/components/LeaveRequestModal";
 
 import { useAuthStore } from "../../src/store/auth.store";
 import { useLeaveStore } from "../../src/store/leave.store";
+import { colors } from "../../src/core/theme";
 
 export default function Leave() {
   const user = useAuthStore((s) => s.user);
@@ -70,7 +71,7 @@ export default function Leave() {
           contentContainerStyle={{ paddingBottom: 32 }}
           renderSectionHeader={({ section }) => (
             <View style={styles.yearHeader}>
-              <MaterialIcons name="calendar-today" size={18} color="#0F172A" />
+              <MaterialIcons name="calendar-today" size={18} color={colors.secondary} />
               <Text style={styles.yearText}>{section.title}</Text>
             </View>
           )}
@@ -89,14 +90,14 @@ export default function Leave() {
                   <MaterialIcons
                     name={statusIcon(item.status)}
                     size={14}
-                    color="#0F172A"
+                    color={colors.secondary}
                   />
                   <Text style={styles.badgeText}>{item.status}</Text>
                 </View>
               </View>
 
               <View style={styles.dateRow}>
-                <MaterialIcons name="date-range" size={16} color="#64748B" />
+                <MaterialIcons name="date-range" size={16} color={colors.textSecondary} />
                 <Text style={styles.dateText}>
                   {item.startDate.toDate().toLocaleDateString("tr-TR")} →{" "}
                   {item.endDate.toDate().toLocaleDateString("tr-TR")}
@@ -108,7 +109,7 @@ export default function Leave() {
                   <MaterialIcons
                     name="info-outline"
                     size={16}
-                    color="#B91C1C"
+                    color={colors.accent}
                   />
                   <Text style={styles.rejectText}>{item.rejectReason}</Text>
                 </View>
@@ -134,7 +135,7 @@ export default function Leave() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.background,
   },
 
   actions: {
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
   empty: {
     textAlign: "center",
     marginTop: 40,
-    color: "#64748B",
+    color: colors.textSecondary,
   },
 
   yearHeader: {
@@ -160,16 +161,16 @@ const styles = StyleSheet.create({
   yearText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0F172A",
+    color: colors.secondary,
   },
 
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     marginHorizontal: 16,
     marginBottom: 12,
     padding: 16,
     borderRadius: 16,
-    shadowColor: "#000",
+    shadowColor: colors.secondary,
     shadowOpacity: 0.06,
     shadowRadius: 10,
     elevation: 4,
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
   type: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#0F172A",
+    color: colors.secondary,
     textTransform: "capitalize",
   },
 
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
-    backgroundColor: "#E0E7FF",
+    backgroundColor: colors.primarySoft,
   },
 
   badgeText: {
@@ -205,11 +206,11 @@ const styles = StyleSheet.create({
   },
 
   success: {
-    backgroundColor: "#DCFCE7",
+    backgroundColor: colors.successSoft,
   },
 
   error: {
-    backgroundColor: "#FEE2E2",
+    backgroundColor: colors.accentSoft,
   },
 
   dateRow: {
@@ -220,7 +221,7 @@ const styles = StyleSheet.create({
   },
 
   dateText: {
-    color: "#475569",
+    color: colors.textSecondary,
   },
 
   rejectBox: {
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
   },
 
   rejectText: {
-    color: "#B91C1C",
+    color: colors.accent,
     fontSize: 13,
   },
 });

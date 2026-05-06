@@ -16,6 +16,7 @@ import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AppButton from "./AppButton";
 import PageHeader from "./PageHeader";
+import { colors } from "../core/theme";
 
 type Props = {
   visible: boolean;
@@ -100,7 +101,7 @@ export default function LeaveRequestModal({
                 selectedValue={type}
                 onValueChange={(itemValue) => setType(itemValue)}
                 style={styles.picker}
-                itemStyle={{ color: "#111", backgroundColor: "#F9FAFB" }}
+                itemStyle={{ color: colors.textPrimary, backgroundColor: colors.background }}
               >
                 <Picker.Item label="Yıllık İzin" value="yıllık" />
                 <Picker.Item label="Hastalık İzni" value="hasta" />
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 20,
@@ -213,26 +214,26 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   pickerWrapper: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
   },
   picker: {
-    color: "#111",
-    backgroundColor: "#F9FAFB",
+    color: colors.textPrimary,
+    backgroundColor: colors.background,
   },
 
   pickerItem: {
-    color: "#111",
+    color: colors.textPrimary,
   },
   input: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 12,
     marginTop: 4,
     minHeight: 80,
   },
   inlinePicker: {
-    backgroundColor: "#111",
+    backgroundColor: colors.textPrimary,
     borderRadius: 12,
     marginTop: 8,
     padding: 8,

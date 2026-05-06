@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import PageHeader from "../../src/components/PageHeader";
 import { useAnnouncementStore } from "../../src/store/announcement.store";
+import { colors } from "../../src/core/theme";
 
 function formatDate(date: Date | null) {
   if (!date) return "Tarih yok";
@@ -36,7 +37,7 @@ export default function Announcements() {
 
       {loading && announcements.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator color="#2563EB" />
+          <ActivityIndicator color={colors.primary} />
           <Text style={styles.centerText}>Duyurular yukleniyor...</Text>
         </View>
       ) : (
@@ -51,7 +52,7 @@ export default function Announcements() {
             <RefreshControl
               refreshing={loading}
               onRefresh={fetchAnnouncements}
-              tintColor="#2563EB"
+              tintColor={colors.primary}
             />
           }
           ListEmptyComponent={
@@ -59,7 +60,7 @@ export default function Announcements() {
               <Ionicons
                 name="megaphone-outline"
                 size={36}
-                color="#94A3B8"
+                color={colors.textSecondary}
               />
               <Text style={styles.emptyTitle}>Henuz duyuru yok</Text>
               <Text style={styles.emptyText}>
@@ -73,7 +74,7 @@ export default function Announcements() {
                 <Ionicons
                   name="alert-circle-outline"
                   size={18}
-                  color="#B91C1C"
+                  color={colors.accent}
                 />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
@@ -83,7 +84,7 @@ export default function Announcements() {
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.iconWrap}>
-                  <Ionicons name="megaphone-outline" size={20} color="#2563EB" />
+                  <Ionicons name="megaphone-outline" size={20} color={colors.primary} />
                 </View>
 
                 <View style={styles.titleWrap}>
@@ -107,7 +108,7 @@ export default function Announcements() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.background,
   },
 
   center: {
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
   },
 
   centerText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: 13,
   },
 
@@ -141,12 +142,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0F172A",
+    color: colors.secondary,
   },
 
   emptyText: {
     fontSize: 13,
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center",
   },
 
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#FEE2E2",
+    backgroundColor: colors.accentSoft,
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
@@ -162,17 +163,17 @@ const styles = StyleSheet.create({
 
   errorText: {
     flex: 1,
-    color: "#B91C1C",
+    color: colors.accent,
     fontSize: 13,
     fontWeight: "600",
   },
 
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: colors.secondary,
     shadowOpacity: 0.06,
     shadowRadius: 10,
     elevation: 4,
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#DBEAFE",
+    backgroundColor: colors.primarySoft,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -200,18 +201,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0F172A",
+    color: colors.secondary,
   },
 
   meta: {
     marginTop: 4,
     fontSize: 12,
-    color: "#64748B",
+    color: colors.textSecondary,
   },
 
   message: {
     marginTop: 12,
-    color: "#334155",
+    color: colors.textPrimary,
     fontSize: 14,
     lineHeight: 20,
   },

@@ -6,6 +6,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import AppButton from "../AppButton";
 import { useAdminShiftsStore } from "../../store/adminShifts.store";
 import { AdminUser } from "../../services/adminUsers.service";
+import { colors } from "../../core/theme";
 
 type Props = {
   visible: boolean;
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
 
   title: {
@@ -227,10 +228,10 @@ const styles = StyleSheet.create({
   },
 
   pickerWrapper: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     overflow: "hidden",
   },
 
@@ -241,14 +242,14 @@ const styles = StyleSheet.create({
 
   timePicker: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 12,
   },
 
   errorText: {
     marginTop: 8,
     marginBottom: 8,
-    color: "#DC2626",
+    color: colors.accent,
     fontSize: 13,
     fontWeight: "600",
   },

@@ -2,6 +2,7 @@ import { Modal, View, Text, StyleSheet, TextInput } from "react-native";
 import { useState, useEffect } from "react";
 import AppButton from "../AppButton";
 import { LeaveDoc } from "../../services/leave.service";
+import { colors } from "../../core/theme";
 
 type Props = {
   visible: boolean;
@@ -121,13 +122,13 @@ export default function LeaveReviewModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: colors.overlay,
     justifyContent: "center",
     padding: 16,
   },
 
   modal: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
   },
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
 
   input: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 10,
     marginTop: 4,
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 8,
     marginBottom: 8,
-    color: "#DC2626",
+    color: colors.accent,
     fontSize: 13,
     fontWeight: "600",
   },

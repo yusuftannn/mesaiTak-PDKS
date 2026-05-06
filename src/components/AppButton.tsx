@@ -1,5 +1,6 @@
 import { Pressable, Text, View, StyleSheet } from "react-native";
 import { ReactNode } from "react";
+import { colors } from "../core/theme";
 
 type Variant = "primary" | "danger" | "secondary";
 
@@ -20,17 +21,17 @@ export default function AppButton({
 }: Props) {
   const getBackgroundColor = () => {
     if (disabled) {
-      if (variant === "primary") return "#93C5FD";
-      if (variant === "danger") return "#FCA5A5";
-      return "#E5E7EB";
+      if (variant === "primary") return colors.primaryMuted;
+      if (variant === "danger") return colors.accentMuted;
+      return colors.border;
     }
 
-    if (variant === "primary") return "#2563EB";
-    if (variant === "danger") return "#DC2626";
-    return "#E5E7EB";
+    if (variant === "primary") return colors.primary;
+    if (variant === "danger") return colors.accent;
+    return colors.border;
   };
 
-  const textColor = variant === "secondary" ? "#111827" : "#FFFFFF";
+  const textColor = variant === "secondary" ? colors.textPrimary : colors.surface;
 
   return (
     <Pressable
