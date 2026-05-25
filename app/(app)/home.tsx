@@ -31,6 +31,7 @@ export default function Home() {
   const { todayShift, loadShifts } = useShiftStore();
   const { branches, fetchBranches } = useBranchStore();
   const [showScanner, setShowScanner] = useState(false);
+  const [startingWork, setStartingWork] = useState(false);
   const isProcessingRef = useRef(false);
   const { skipLate, skipEarly } = useLocalSearchParams<{
     skipLate?: string;
@@ -386,7 +387,11 @@ export default function Home() {
                   <AppButton
                     title={todayShift ? "QR ile Başla" : "Bugün mesain yok"}
                     icon={
-                      <Ionicons name="qr-code-outline" size={18} color={colors.surface} />
+                      <Ionicons
+                        name="qr-code-outline"
+                        size={18}
+                        color={colors.surface}
+                      />
                     }
                     disabled={!todayShift}
                     onPress={handleOpenScanner}
@@ -442,34 +447,69 @@ export default function Home() {
                           title={
                             todayShift ? "Mesaiyi Başlat" : "Bugün mesain yok"
                           }
-                          icon={<Ionicons name="play" size={18} color={colors.surface} />}
-                          disabled={!hasBranch || !todayShift}
+                          icon={
+                            <Ionicons
+                              name="play"
+                              size={18}
+                              color={colors.surface}
+                            />
+                          }
+                          disabled={!hasBranch || !todayShift || startingWork}
                           onPress={async () => {
                             if (!user || !selectedBranchId) return;
 
-                            const { status } =
-                              await Location.getForegroundPermissionsAsync();
+                            if (isProcessingRef.current) return;
+                            isProcessingRef.current = true;
 
-                            let finalStatus = status;
+                            try {
+                              const { status } =
+                                await Location.getForegroundPermissionsAsync();
 
-                            if (status !== "granted") {
-                              const { status: newStatus } =
-                                await Location.requestForegroundPermissionsAsync();
-                              finalStatus = newStatus;
-                            }
+                              let finalStatus = status;
 
-                            if (finalStatus !== "granted") {
-                              Alert.alert(
-                                "Konum İzni Gerekli",
-                                "Mesai başlatmak için konum izni vermelisin.",
-                              );
-                              return;
-                            }
+                              if (status !== "granted") {
+                                const { status: newStatus } =
+                                  await Location.requestForegroundPermissionsAsync();
 
-                            const loc = await Location.getCurrentPositionAsync({
-                              accuracy: Location.Accuracy.High,
-                            });
-                            const doStartWork = async () => {
+                                finalStatus = newStatus;
+                              }
+
+                              if (finalStatus !== "granted") {
+                                Alert.alert(
+                                  "Konum İzni Gerekli",
+                                  "Mesai başlatmak için konum izni vermelisin.",
+                                );
+
+                                return;
+                              }
+
+                              const loc =
+                                await Location.getCurrentPositionAsync({
+                                  accuracy: Location.Accuracy.High,
+                                });
+
+                              if (checkLate() && skipLate !== "1") {
+                                Alert.alert(
+                                  "Geç Kaldın",
+                                  "Mesaiye geç giriş yaptınız. Devam edebilmek için mazeret bildirmeniz gerekiyor.",
+                                  [
+                                    {
+                                      text: "Mazeret Bildir",
+                                      onPress: () => {
+                                        router.replace(
+                                          "/(app)/excuse?type=late",
+                                        );
+                                      },
+                                    },
+                                  ],
+                                  {
+                                    cancelable: false,
+                                  },
+                                );
+
+                                return;
+                              }
+
                               await startWork(user.uid, {
                                 branchId: selectedBranchId,
                                 location: {
@@ -478,27 +518,16 @@ export default function Home() {
                                   accuracy: loc.coords.accuracy ?? 0,
                                 },
                               });
-                            };
-                            if (checkLate() && skipLate !== "1") {
-                              Alert.alert(
-                                "Geç Kaldın",
-                                "Mesaiye geç giriş yaptınız. Devam edebilmek için mazeret bildirmeniz gerekiyor.",
-                                [
-                                  {
-                                    text: "Mazeret Bildir",
-                                    onPress: () => {
-                                      router.replace("/(app)/excuse?type=late");
-                                    },
-                                  },
-                                ],
-                                {
-                                  cancelable: false,
-                                },
-                              );
 
-                              return;
+                              Alert.alert("Başarılı", "Mesai başlatıldı ✅");
+                            } catch (e: any) {
+                              Alert.alert(
+                                "Hata",
+                                e?.message || "Mesai başlatılamadı",
+                              );
+                            } finally {
+                              isProcessingRef.current = false;
                             }
-                            await doStartWork();
                           }}
                         />
                       </>
@@ -536,7 +565,9 @@ export default function Home() {
 
               <AppButton
                 title="Molaya Çık"
-                icon={<Ionicons name="pause" size={18} color={colors.primary} />}
+                icon={
+                  <Ionicons name="pause" size={18} color={colors.primary} />
+                }
                 onPress={startBreak}
                 variant="secondary"
               />
@@ -544,7 +575,9 @@ export default function Home() {
               <View style={{ marginTop: 8 }}>
                 <AppButton
                   title="Mesaiyi Bitir"
-                  icon={<Ionicons name="stop" size={18} color={colors.surface} />}
+                  icon={
+                    <Ionicons name="stop" size={18} color={colors.surface} />
+                  }
                   onPress={() => {
                     if (checkEarlyLeave() && skipEarly !== "1") {
                       Alert.alert(

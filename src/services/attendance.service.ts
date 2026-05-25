@@ -93,6 +93,7 @@ export async function startWork(
             distance > 1000 ? "high" : distance > 500 ? "medium" : "low";
 
           await addDoc(collection(db, "suspicious_logs"), {
+            companyId,
             userId: uid,
             userName: userData?.userName ?? "",
             branchId,
