@@ -1,8 +1,10 @@
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { db } from "./firebase";
+import { getCompanyId } from "../utils/company";
 
 export type Announcement = {
   id: string;
+  companyId: string;
   title: string;
   message: string;
   createdByUid: string | null;
@@ -14,7 +16,17 @@ export type Announcement = {
 const ref = collection(db, "announcements");
 
 export async function getAnnouncements(): Promise<Announcement[]> {
-  const q = query(ref, orderBy("createdAt", "desc"));
+  const companyId = getCompanyId();
+
+  if (!companyId) {
+    return [];
+  }
+
+  const q = query(
+    ref,
+    where("companyId", "==", companyId),
+    orderBy("createdAt", "desc"),
+  );
   const snap = await getDocs(q);
 
   return snap.docs.map((doc) => {
@@ -22,6 +34,7 @@ export async function getAnnouncements(): Promise<Announcement[]> {
 
     return {
       id: doc.id,
+      companyId: data.companyId,
       title: data.title,
       message: data.message,
       createdByUid: data.createdByUid ?? null,
