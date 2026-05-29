@@ -11,6 +11,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { getCompanyId } from "../utils/company";
 
 const shiftsRef = collection(db, "shifts");
 
@@ -25,8 +26,11 @@ export async function createShift(data: {
   endTime: string;
   type: "normal" | "gece" | "mesai";
 }) {
+  const companyId = getCompanyId();
+
   return addDoc(shiftsRef, {
     userId: data.userId,
+    companyId,
     date: normalizeDate(data.date),
     startTime: data.startTime,
     endTime: data.endTime,
@@ -60,9 +64,11 @@ export async function updateShift(
   },
 ) {
   const ref = doc(db, "shifts", shiftId);
+  const companyId = getCompanyId();
 
   return updateDoc(ref, {
     userId: data.userId,
+    companyId,
     date: data.date,
     startTime: data.startTime,
     endTime: data.endTime,

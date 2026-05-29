@@ -3,7 +3,7 @@
     "name": "Mesaitak",
     "slug": "mesaitak",
     "scheme": "mesaitak",
-    "plugins": ["expo-router"],
+    "plugins": ["expo-router", "expo-notifications"],
 
     "ios": {
       "bundleIdentifier": "com.mesaitak.app",
@@ -17,7 +17,8 @@
       "package": "com.mesaitak.app",
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "POST_NOTIFICATIONS"
       ]
     }
   }

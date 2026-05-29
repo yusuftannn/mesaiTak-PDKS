@@ -1,8 +1,10 @@
 import { Stack } from "expo-router";
 import { useAuthBootstrap } from "../src/core/useAuthBootstrap";
+import { useNotifications } from "../src/core/useNotifications";
 
 export default function RootLayout() {
   useAuthBootstrap();
+  useNotifications();
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
