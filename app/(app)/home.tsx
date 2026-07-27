@@ -20,6 +20,7 @@ import AppButton from "../../src/components/AppButton";
 import { formatMinutes } from "../../src/utils/time";
 import { toDateSafe } from "../../src/utils/date";
 import PageHeader from "../../src/components/PageHeader";
+import EmployeeMenu from "../../src/components/EmployeeMenu";
 import QRScanner from "../../src/components/QRScanner";
 
 import * as Location from "expo-location";
@@ -31,6 +32,7 @@ export default function Home() {
   const { todayShift, loadShifts } = useShiftStore();
   const { branches, fetchBranches } = useBranchStore();
   const [showScanner, setShowScanner] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [startingWork, setStartingWork] = useState(false);
   const isProcessingRef = useRef(false);
   const { skipLate, skipEarly } = useLocalSearchParams<{
@@ -254,9 +256,12 @@ export default function Home() {
       <PageHeader
         title="MesaiTak"
         showBack={false}
+        leftIcon="menu-outline"
+        onLeftPress={() => setShowMenu(true)}
         rightIcon="notifications-outline"
         onRightPress={() => router.push("/(app)/announcements")}
       />
+      <EmployeeMenu visible={showMenu} onClose={() => setShowMenu(false)} />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
