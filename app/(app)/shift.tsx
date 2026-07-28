@@ -1,5 +1,11 @@
 import { useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import PageHeader from "../../src/components/PageHeader";
@@ -7,41 +13,41 @@ import { useAuthStore } from "../../src/store/auth.store";
 import { useShiftStore } from "../../src/store/shift.store";
 import { colors } from "../../src/core/theme";
 
+function toDateAny(value: any): Date {
+  if (!value) return new Date(NaN);
+
+  if (typeof value.toDate === "function") return value.toDate();
+  if (typeof value.seconds === "number") return new Date(value.seconds * 1000);
+  if (value instanceof Date) return value;
+
+  return new Date(value);
+}
+
+const trFormatter = new Intl.DateTimeFormat("tr-TR", {
+  timeZone: "Europe/Istanbul",
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
+
+function formatTR(dateValue: any) {
+  return trFormatter.format(toDateAny(dateValue));
+}
+
 export default function Shift() {
   const user = useAuthStore((s) => s.user);
   const { loading, shifts, todayShift, loadShifts } = useShiftStore();
 
   useEffect(() => {
     if (!user?.uid) return;
+
     loadShifts(user.uid);
-  }, [user?.uid]);
+  }, [user?.uid, loadShifts]);
 
   const capitalize = (text?: string) => {
     if (!text) return "Tanımlı değil";
     return text.charAt(0).toUpperCase() + text.slice(1);
   };
-
-  function toDateAny(value: any): Date {
-    if (!value) return new Date(NaN);
-
-    if (typeof value.toDate === "function") return value.toDate();
-    if (typeof value.seconds === "number")
-      return new Date(value.seconds * 1000);
-    if (value instanceof Date) return value;
-
-    return new Date(value);
-  }
-
-  function formatTR(dateValue: any) {
-    const date = toDateAny(dateValue);
-
-    return new Intl.DateTimeFormat("tr-TR", {
-      timeZone: "Europe/Istanbul",
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    }).format(date);
-  }
 
   return (
     <View style={styles.container}>
@@ -50,7 +56,11 @@ export default function Shift() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.todayCard}>
           <View style={styles.todayRow}>
-            <Ionicons name="calendar-outline" size={24} color={colors.primary} />
+            <Ionicons
+              name="calendar-outline"
+              size={24}
+              color={colors.primary}
+            />
             <Text style={styles.todayTitle}>Bugünkü Vardiya</Text>
           </View>
 
@@ -62,7 +72,7 @@ export default function Shift() {
 
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>
-                  {capitalize(todayShift.type) || "Tanımlı değil"}
+                  {capitalize(todayShift.type)}
                 </Text>
               </View>
             </>
@@ -73,11 +83,21 @@ export default function Shift() {
 
         <Text style={styles.sectionTitle}>Tüm Vardiyalar</Text>
 
-        {loading && <Text style={styles.subText}>Yükleniyor…</Text>}
+        {loading && (
+          <ActivityIndicator
+            size="small"
+            color={colors.primary}
+            style={{ marginVertical: 20 }}
+          />
+        )}
 
         {!loading && shifts.length === 0 && (
           <View style={styles.emptyContainer}>
-            <Ionicons name="calendar-clear-outline" size={48} color={colors.textSecondary} />
+            <Ionicons
+              name="calendar-clear-outline"
+              size={48}
+              color={colors.textSecondary}
+            />
 
             <Text style={styles.emptyTitle}>Henüz vardiya yok</Text>
 
@@ -135,7 +155,7 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 8,
   },
-  
+
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -160,7 +180,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     lineHeight: 18,
   },
-  
+
   todayTitle: {
     fontSize: 16,
     fontWeight: "600",
@@ -225,11 +245,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: colors.textPrimary,
-  },
-
-  date: {
-    fontSize: 13,
-    color: colors.textSecondary,
   },
 
   right: {

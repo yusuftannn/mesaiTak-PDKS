@@ -15,17 +15,14 @@ function calcBreakMinutes(start: any, end: any) {
   return Math.floor((endDate.getTime() - s.getTime()) / 60000);
 }
 
+const BREAK_TYPES: Record<string, string> = {
+  yemek: "Yemek Molası",
+  cay_kahve: "Çay / Kahve",
+  sigara: "Sigara",
+};
+
 function mapBreakType(type: string) {
-  switch (type) {
-    case "yemek":
-      return "Yemek Molası";
-    case "cay_kahve":
-      return "Çay / Kahve";
-    case "sigara":
-      return "Sigara";
-    default:
-      return "Diğer";
-  }
+  return BREAK_TYPES[type] ?? "Diğer";
 }
 
 export default function Break() {
@@ -41,7 +38,11 @@ export default function Break() {
       >
         {breaks.length === 0 && (
           <View style={styles.empty}>
-            <Ionicons name="cafe-outline" size={48} color={colors.textSecondary} />
+            <Ionicons
+              name="cafe-outline"
+              size={48}
+              color={colors.textSecondary}
+            />
             <Text style={styles.emptyText}>Henüz mola kaydı yok</Text>
           </View>
         )}
@@ -49,7 +50,8 @@ export default function Break() {
         {breaks.map((b, index) => {
           const minutes = calcBreakMinutes(b.start, b.end);
           const isActive = !b.end;
-
+          const start = toDateSafe(b.start);
+          const end = toDateSafe(b.end);
           return (
             <View
               key={index}
@@ -66,13 +68,9 @@ export default function Break() {
               </View>
 
               <Text style={styles.time}>
-                {toDateSafe(b.start)
-                  ? toDateSafe(b.start)!.toLocaleTimeString("tr-TR")
-                  : "--"}
+                {start ? start.toLocaleTimeString("tr-TR") : "--"}
                 {" → "}
-                {toDateSafe(b.end)
-                  ? toDateSafe(b.end)!.toLocaleTimeString("tr-TR")
-                  : "—"}
+                {end ? end.toLocaleTimeString("tr-TR") : "—"}
               </Text>
 
               <Text style={styles.duration}>
@@ -94,13 +92,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 24,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: colors.textPrimary,
-    marginBottom: 16,
   },
 
   empty: {
