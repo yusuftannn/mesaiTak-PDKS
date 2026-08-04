@@ -50,6 +50,12 @@ export default function AppLayout() {
       <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="excuse" options={{ href: null }} />
       <Tabs.Screen name="announcements" options={{ href: null }} />
+      <Tabs.Screen name="about" options={{ href: null }} />
+      <Tabs.Screen name="faq" options={{ href: null }} />
+      <Tabs.Screen name="contact" options={{ href: null }} />
+      <Tabs.Screen name="privacy" options={{ href: null }} />
+      <Tabs.Screen name="cookie" options={{ href: null }} />
+      <Tabs.Screen name="terms" options={{ href: null }} />
     </Tabs>
   );
 }

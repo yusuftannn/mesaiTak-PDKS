@@ -10,7 +10,7 @@ type Props = {
   onClose: () => void;
 };
 
-const menuItems = [
+const mainItems = [
   { label: "Anasayfa", icon: "home-outline", href: "/(app)/home" },
   { label: "Vardiyam", icon: "calendar-outline", href: "/(app)/shift" },
   { label: "Molalarım", icon: "cafe-outline", href: "/(app)/break" },
@@ -19,12 +19,29 @@ const menuItems = [
   { label: "Profilim", icon: "person-outline", href: "/(app)/profile" },
 ] as const;
 
+const corporateItems = [
+  { label: "Hakkımızda", icon: "information-circle-outline", href: "/(app)/about" },
+  { label: "SSS", icon: "help-circle-outline", href: "/(app)/faq" },
+  { label: "İletişim", icon: "call-outline", href: "/(app)/contact" },
+] as const;
+
+const legalItems = [
+  { label: "Gizlilik Politikası", icon: "shield-checkmark-outline", href: "/(app)/privacy" },
+  { label: "Çerez Politikası", icon: "server-outline", href: "/(app)/cookie" },
+  { label: "Kullanım Şartları", icon: "document-outline", href: "/(app)/terms" },
+] as const;
+
 export default function EmployeeMenu({ visible, onClose }: Props) {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
-  const navigate = (href: (typeof menuItems)[number]["href"]) => {
+  const navigate = (
+    href:
+      | (typeof mainItems)[number]["href"]
+      | (typeof corporateItems)[number]["href"]
+      | (typeof legalItems)[number]["href"],
+  ) => {
     onClose();
     router.push(href);
   };
@@ -53,7 +70,25 @@ export default function EmployeeMenu({ visible, onClose }: Props) {
           </View>
 
           <View style={styles.divider} />
-          {menuItems.map((item) => (
+          {mainItems.map((item) => (
+            <Pressable key={item.href} style={styles.menuItem} onPress={() => navigate(item.href)}>
+              <Ionicons name={item.icon} size={22} color={colors.secondary} />
+              <Text style={styles.menuText}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+            </Pressable>
+          ))}
+
+          <Text style={styles.sectionLabel}>Kurumsal</Text>
+          {corporateItems.map((item) => (
+            <Pressable key={item.href} style={styles.menuItem} onPress={() => navigate(item.href)}>
+              <Ionicons name={item.icon} size={22} color={colors.secondary} />
+              <Text style={styles.menuText}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+            </Pressable>
+          ))}
+
+          <Text style={styles.sectionLabel}>Yasal Bilgiler</Text>
+          {legalItems.map((item) => (
             <Pressable key={item.href} style={styles.menuItem} onPress={() => navigate(item.href)}>
               <Ionicons name={item.icon} size={22} color={colors.secondary} />
               <Text style={styles.menuText}>{item.label}</Text>
@@ -82,6 +117,22 @@ const styles = StyleSheet.create({
   email: { marginTop: 2, fontSize: 12, color: colors.textSecondary },
   closeButton: { width: 38, height: 38, alignItems: "center", justifyContent: "center" },
   divider: { height: 1, backgroundColor: colors.border, marginVertical: 8 },
+  legalLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.textSecondary,
+    marginTop: 16,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.textSecondary,
+    marginTop: 16,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
   menuItem: { minHeight: 52, flexDirection: "row", alignItems: "center", gap: 14, borderRadius: 12, paddingHorizontal: 10 },
   menuText: { flex: 1, fontSize: 15, fontWeight: "500", color: colors.textPrimary },
   logoutText: { color: colors.accent },
