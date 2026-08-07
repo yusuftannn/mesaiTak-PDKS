@@ -90,20 +90,45 @@ export default function QRScanner({ onSuccess, onClose }: Props) {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <CameraView
-        style={{ flex: 1 }}
-        zoom={0.2} 
+        style={StyleSheet.absoluteFill}
+        zoom={0.2}
         barcodeScannerSettings={{
           barcodeTypes: ["qr"],
         }}
         onBarcodeScanned={handleScan}
       />
 
-      <View style={styles.overlay}>
-        <Text style={styles.text}>QR kodu okut</Text>
+      <View style={styles.mask} pointerEvents="none">
+        <View style={styles.topShade}>
+          <Text style={styles.title}>QR kodu tara</Text>
+          <Text style={styles.text}>
+            QR kodu aşağıdaki alanın içine hizala
+          </Text>
+        </View>
 
-        <TouchableOpacity onPress={onClose}>
+        <View style={styles.scanRow}>
+          <View style={styles.sideShade} />
+          <View style={styles.scanArea}>
+            <View style={[styles.corner, styles.topLeft]} />
+            <View style={[styles.corner, styles.topRight]} />
+            <View style={[styles.corner, styles.bottomLeft]} />
+            <View style={[styles.corner, styles.bottomRight]} />
+          </View>
+          <View style={styles.sideShade} />
+        </View>
+
+        <View style={styles.bottomShade} />
+      </View>
+
+      <View style={styles.closeWrapper}>
+        <TouchableOpacity
+          onPress={onClose}
+          style={styles.closeButton}
+          accessibilityRole="button"
+          accessibilityLabel="QR tarayıcıyı kapat"
+        >
           <Text style={styles.close}>Kapat</Text>
         </TouchableOpacity>
       </View>
@@ -112,21 +137,97 @@ export default function QRScanner({ onSuccess, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  overlay: {
-    position: "absolute",
-    bottom: 40,
-    width: "100%",
+  mask: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  topShade: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.58)",
     alignItems: "center",
+    justifyContent: "flex-end",
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  scanRow: {
+    flexDirection: "row",
+    height: 260,
+  },
+  sideShade: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.58)",
+  },
+  scanArea: {
+    width: 260,
+    height: 260,
+  },
+  corner: {
+    position: "absolute",
+    width: 38,
+    height: 38,
+    borderColor: colors.surface,
+  },
+  topLeft: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderTopLeftRadius: 12,
+  },
+  topRight: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderTopRightRadius: 12,
+  },
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderBottomLeftRadius: 12,
+  },
+  bottomRight: {
+    right: 0,
+    bottom: 0,
+    borderRightWidth: 4,
+    borderBottomWidth: 4,
+    borderBottomRightRadius: 12,
+  },
+  bottomShade: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.58)",
+  },
+  title: {
+    color: colors.surface,
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 6,
   },
   text: {
     color: colors.surface,
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  closeWrapper: {
+    position: "absolute",
+    right: 20,
+    top: 48,
+  },
+  closeButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
   },
   close: {
     color: colors.surface,
