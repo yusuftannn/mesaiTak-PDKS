@@ -2,7 +2,20 @@
 
 MesaiTak, kuruluşların çalışan devam/devamsızlık izleme, vardiya yönetimi ve izin taleplerini verimli bir şekilde yönetmesine yardımcı olmak üzere tasarlanmış kapsamlı bir insan kaynakları yönetim platformudur. Gerçek zamanlı takip, konum tabanlı izleme ve detaylı raporlama yetenekleri ile organizasyonlarının emek gücünü etkili bir şekilde yönetmesini sağlar.
 
----
+
+## 📱 Uygulama Ekranları
+<br>
+
+<p align="center">
+  <img
+    src="/screenshots/mesaitak-mobile-img.png"
+    alt="MesaiTak Mobil Uygulama Ekranları"
+    width="100%"
+  />
+</p>
+
+
+<br>
 
 ## 🎯 Proje Hakkında
 

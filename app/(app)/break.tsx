@@ -106,14 +106,10 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.primarySoft,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: colors.secondary,
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
 
   activeCard: {
