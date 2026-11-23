@@ -39,7 +39,13 @@ export default function AppLayout() {
             iconName = focused ? "calendar" : "calendar-outline";
           if (route.name === "leave")
             iconName = focused ? "document-text" : "document-text-outline";
-          return <Ionicons name={iconName} size={22} color={color} />;
+          return (
+            <Ionicons
+              name={iconName}
+              size={22}
+              color={typeof color === "number" ? undefined : color ?? undefined}
+            />
+          );
         },
       })}
     >
@@ -48,7 +54,6 @@ export default function AppLayout() {
       <Tabs.Screen name="shift" options={{ title: "Vardiya" }} />
       <Tabs.Screen name="leave" options={{ title: "İzin" }} />
       <Tabs.Screen name="profile" options={{ href: null }} />
-      <Tabs.Screen name="excuse" options={{ href: null }} />
       <Tabs.Screen name="announcements" options={{ href: null }} />
       <Tabs.Screen name="about" options={{ href: null }} />
       <Tabs.Screen name="faq" options={{ href: null }} />

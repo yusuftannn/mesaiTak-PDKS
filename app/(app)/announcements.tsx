@@ -78,7 +78,7 @@ export default function Announcements() {
                 />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
-            ) : null
+            ) : undefined
           }
           renderItem={({ item }) => (
             <View style={styles.card}>

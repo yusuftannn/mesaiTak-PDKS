@@ -146,9 +146,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  mask: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  mask: StyleSheet.absoluteFill,
   topShade: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.58)",

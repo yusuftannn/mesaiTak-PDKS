@@ -47,7 +47,7 @@ export default function AdminLayout() {
             <Ionicons
               name={focused ? "speedometer" : "speedometer-outline"}
               size={22}
-              color={color}
+              color={typeof color === "number" ? undefined : color ?? undefined}
             />
           ),
         }}
@@ -61,7 +61,7 @@ export default function AdminLayout() {
             <Ionicons
               name={focused ? "people" : "people-outline"}
               size={22}
-              color={color}
+              color={typeof color === "number" ? undefined : color ?? undefined}
             />
           ),
         }}
@@ -74,7 +74,7 @@ export default function AdminLayout() {
             <Ionicons
               name={focused ? "calendar" : "calendar-outline"}
               size={22}
-              color={color}
+              color={typeof color === "number" ? undefined : color ?? undefined}
             />
           ),
         }}
@@ -87,7 +87,7 @@ export default function AdminLayout() {
             <Ionicons
               name={focused ? "checkmark-done" : "checkmark-done-outline"}
               size={22}
-              color={color}
+              color={typeof color === "number" ? undefined : color ?? undefined}
             />
           ),
         }}

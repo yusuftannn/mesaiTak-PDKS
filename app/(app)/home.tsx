@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useAuthStore } from "../../src/store/auth.store";
 import { useHomeStore } from "../../src/store/home.store";
 import { useShiftStore } from "../../src/store/shift.store";
@@ -21,7 +21,9 @@ import { formatMinutes } from "../../src/utils/time";
 import { toDateSafe } from "../../src/utils/date";
 import PageHeader from "../../src/components/PageHeader";
 import EmployeeMenu from "../../src/components/EmployeeMenu";
+import ExcuseForm from "../../src/components/ExcuseForm";
 import QRScanner from "../../src/components/QRScanner";
+import type { ExcuseType } from "../../src/types/excuse.types";
 
 import * as Location from "expo-location";
 import PersonalQR from "../../src/components/PersonalQR";
@@ -35,10 +37,13 @@ export default function Home() {
   const [showMenu, setShowMenu] = useState(false);
   const [startingWork, setStartingWork] = useState(false);
   const isProcessingRef = useRef(false);
-  const { skipLate, skipEarly } = useLocalSearchParams<{
-    skipLate?: string;
-    skipEarly?: string;
-  }>();
+  const [pendingExcuse, setPendingExcuse] = useState<{
+    type: ExcuseType;
+    shiftId: string;
+  } | null>(null);
+  const [reportedExcuses, setReportedExcuses] = useState<
+    Partial<Record<ExcuseType, string>>
+  >({});
   const [activeTab, setActiveTab] = useState<"kamerali" | "kamerasiz" | "qr">(
     "kamerali",
   );
@@ -170,6 +175,10 @@ export default function Home() {
     return now < shiftEnd;
   };
 
+  const openExcuseForm = (type: ExcuseType) => {
+    if (todayShift) setPendingExcuse({ type, shiftId: todayShift.id });
+  };
+
   function getShiftEnd(date: Date, start: string, end: string): Date | null {
     const startDate = combineDateAndTime(date, start);
     const endDate = combineDateAndTime(date, end);
@@ -201,7 +210,7 @@ export default function Home() {
             return;
           }
 
-          if (checkLate() && skipLate !== "1") {
+          if (checkLate() && reportedExcuses.late !== todayShift.id) {
             Alert.alert(
               "Geç Kaldın",
               "Mesaiye geç giriş yaptınız. Devam edebilmek için mazeret bildirmeniz gerekiyor.",
@@ -211,7 +220,7 @@ export default function Home() {
                   onPress: () => {
                     isProcessingRef.current = false;
                     setShowScanner(false);
-                    router.replace("/(app)/excuse?type=late");
+                    openExcuseForm("late");
                   },
                 },
               ],
@@ -262,6 +271,20 @@ export default function Home() {
         onRightPress={() => router.push("/(app)/announcements")}
       />
       <EmployeeMenu visible={showMenu} onClose={() => setShowMenu(false)} />
+      {pendingExcuse && user && (
+        <ExcuseForm
+          type={pendingExcuse.type}
+          userId={user.uid}
+          onClose={() => setPendingExcuse(null)}
+          onSubmitted={() => {
+            setReportedExcuses((previous) => ({
+              ...previous,
+              [pendingExcuse.type]: pendingExcuse.shiftId,
+            }));
+            setPendingExcuse(null);
+          }}
+        />
+      )}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
@@ -493,18 +516,17 @@ export default function Home() {
                                   accuracy: Location.Accuracy.High,
                                 });
 
-                              if (checkLate() && skipLate !== "1") {
+                              if (
+                                checkLate() &&
+                                reportedExcuses.late !== todayShift?.id
+                              ) {
                                 Alert.alert(
                                   "Geç Kaldın",
                                   "Mesaiye geç giriş yaptınız. Devam edebilmek için mazeret bildirmeniz gerekiyor.",
                                   [
                                     {
                                       text: "Mazeret Bildir",
-                                      onPress: () => {
-                                        router.replace(
-                                          "/(app)/excuse?type=late",
-                                        );
-                                      },
+                                      onPress: () => openExcuseForm("late"),
                                     },
                                   ],
                                   {
@@ -584,16 +606,17 @@ export default function Home() {
                     <Ionicons name="stop" size={18} color={colors.surface} />
                   }
                   onPress={() => {
-                    if (checkEarlyLeave() && skipEarly !== "1") {
+                    if (
+                      checkEarlyLeave() &&
+                      reportedExcuses.early !== todayShift?.id
+                    ) {
                       Alert.alert(
                         "Erken Çıkış",
                         "Mesai bitmeden çıkıyorsunuz. Devam edebilmek için mazeret bildirmeniz gerekiyor.",
                         [
                           {
                             text: "Mazeret Bildir",
-                            onPress: () => {
-                              router.replace("/(app)/excuse?type=early");
-                            },
+                            onPress: () => openExcuseForm("early"),
                           },
                         ],
                         {

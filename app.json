@@ -3,8 +3,21 @@
     "name": "Mesaitak",
     "slug": "mesaitak",
     "scheme": "mesaitak",
-    "plugins": ["expo-router", "expo-notifications"],
-
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      "expo-status-bar",
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Mesai başlangıcında şube QR kodunu okumak için kamera kullanılır.",
+          "recordAudioAndroid": false,
+          "microphonePermission": false
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ],
     "ios": {
       "bundleIdentifier": "com.mesaitak.app",
       "infoPlist": {
@@ -12,7 +25,6 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Vardiya süresince konum doğrulaması için kullanılabilir."
       }
     },
-
     "android": {
       "package": "com.mesaitak.app",
       "permissions": [
